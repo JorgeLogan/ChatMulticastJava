@@ -3,8 +3,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,7 +18,7 @@ import javax.swing.SwingConstants;
 
 import interfaces.InterfazEntornoGrafico;
 
-public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
+public abstract  class VentanaServidor extends JFrame implements InterfazEntornoGrafico, ActionListener, WindowListener{
 	
 	/**
 	 * Version pedida por el IDE
@@ -29,6 +32,11 @@ public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
 	protected JList <JLabel>listadoMensajes;
 	protected JList <JLabel>listadoUsuarios;
 	protected JList <JLabel>listadoSalas;
+	
+	// Para agregar elementos a los listados usamos modelos
+	protected DefaultListModel<JLabel> modeloMensajes;
+	protected DefaultListModel<JLabel> modeloUsuarios;
+	protected DefaultListModel<JLabel> modeloSalas;
 	
 	private JScrollPane scrollMensajes;
 	private JScrollPane scrollUsuarios;
@@ -76,8 +84,11 @@ public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
 		pMensajesVert.setLayout(new BoxLayout(pMensajesVert, BoxLayout.Y_AXIS));
 		pMensajes.add(pMensajesVert);
 		
+		// Cremo el panel de mensajes
 		pMensajesVert.add(new JLabel("Mensajes"));
 		this.listadoMensajes = new JList<JLabel>();
+		this.modeloMensajes = new DefaultListModel<JLabel>();
+		this.listadoMensajes.setModel(modeloMensajes);
 		this.scrollMensajes = new JScrollPane(this.listadoMensajes);
 		this.scrollMensajes.setPreferredSize(new Dimension(200,300));
 		pMensajesVert.add(this.scrollMensajes);
@@ -90,6 +101,8 @@ public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
 		pUsuarios.add(pUsuariosVert);
 		pUsuariosVert.add(new JLabel("Clientes conectados"));
 		this.listadoUsuarios = new JList<JLabel>();
+		this.modeloUsuarios = new DefaultListModel<JLabel>();
+		this.listadoUsuarios.setModel(modeloUsuarios);
 		this.scrollUsuarios = new JScrollPane(this.listadoUsuarios);
 		this.scrollUsuarios.setPreferredSize(new Dimension(200,300));
 		pUsuariosVert.add(this.scrollUsuarios);
@@ -100,9 +113,12 @@ public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
 		JPanel pSalasVert = new JPanel();
 		pSalasVert.setLayout(new BoxLayout(pSalasVert, BoxLayout.Y_AXIS));
 		
+		// Creo el elemento para las salas
 		pSalas.add(pSalasVert);
 		pSalasVert.add(new JLabel("Salas disponibles"));
 		this.listadoSalas = new JList<JLabel>();
+		this.modeloSalas = new DefaultListModel<JLabel>();
+		this.listadoSalas.setModel(modeloSalas);
 		this.scrollSalas = new JScrollPane(this.listadoSalas);
 		this.scrollSalas.setPreferredSize(new Dimension(200,275));
 		pSalasVert.add(this.scrollSalas);
@@ -112,21 +128,30 @@ public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
 		this.btnSalir.setAlignmentX(CENTER_ALIGNMENT);;
 		pSalasVert.add(this.btnSalir);
 		
+		// Damos funcionalidad a los botones
+		this.btnConectar.addActionListener(this);
+		this.btnDesconectar.addActionListener(this);
+		this.btnSalir.addActionListener(this);
+		
+		
 		// Modificaciones finales del frame
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.pack();
 		this.setVisible(true);
 		this.setResizable(false);		
 	}
+	
+	// Metodos a implementar en la clase final.
+	public abstract void clickConectar();
+	public abstract void clickDesconectar();
+	public abstract void clickSalir();
 
 	
-	/**
-	 * Funcion principal
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		new VentanaServidor();
-	}
+	//**********************************************************************************************
+	//
+	//		METODOS IMPLEMENTADOS PARA LA INTERFAZ DEL ENTORNO GRAFICO
+	//
+	//**********************************************************************************************
 
 
 	@Override
@@ -136,16 +161,62 @@ public class VentanaServidor extends JFrame implements InterfazEntornoGrafico{
 		if(propio) mensaje.setForeground(Color.green);
 		else mensaje.setForeground(Color.blue);
 		
-		
 		this.listadoMensajes.add(mensaje);
-		this.listadoMensajes.repaint();
-		
+		this.listadoMensajes.repaint();		
 	}
 
-
+	
 	@Override
 	public void limpiarAreaTexto() {
 		this.listadoMensajes.removeAll();
 		
+	}
+
+	
+	//**********************************************************************************************
+	//
+	//		METODOS IMPLEMENTADOS PARA LA INTERFAZ DEL MANEJO DE VENTANAS
+	//		Solo necesito uno, para que el cierre se haga correctamente
+	//
+	//**********************************************************************************************
+	
+	@Override
+	public void windowOpened(WindowEvent e) {}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		System.out.println("Cerrando ventana servidor");
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {}
+	@Override
+	public void windowIconified(WindowEvent e) {}
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+	@Override
+	public void windowActivated(WindowEvent e) {}
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
+
+	//**********************************************************************************************
+	//
+	//		METODOS IMPLEMENTADOS PARA LA INTERFAZ DE ESCUCHA DE EVENTOS (botones)
+	//
+	//**********************************************************************************************
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		switch(e.getActionCommand()) {
+		case "Conectar":
+			this.clickConectar();
+			break;
+		case "Desconectar":
+			this.clickDesconectar();
+			break;
+		case "Salir de la aplicación":
+			this.clickSalir();
+			break;
+		}
 	}
 }

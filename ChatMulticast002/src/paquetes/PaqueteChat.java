@@ -7,7 +7,7 @@ public class PaqueteChat implements Serializable {
 	 * ID serial propuesto por el IDE
 	 */
 	private static final long serialVersionUID = 1L;
-	// Atributos
+	// Atributos del cliente
 	private String nombreUsuario;
 	private String mensaje;	
 	

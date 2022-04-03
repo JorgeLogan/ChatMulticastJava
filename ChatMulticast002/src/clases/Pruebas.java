@@ -1,3 +1,4 @@
+package clases;
 import paquetes.PaqueteChat;
 
 public class Pruebas extends Thread{

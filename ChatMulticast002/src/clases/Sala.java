@@ -1,3 +1,4 @@
+package clases;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 
 import paquetes.PaqueteChat;
+import paquetes.PaqueteSala;
 
 /**
  * La sala con los metodos que necesita para ser mas independiente
@@ -198,6 +200,8 @@ public class Sala extends Thread {
 		// Preparamos la publi
 		this.crearPubli();
 		
+		System.out.println("Comienza emision UDP de la sala " + this.nombreSala);
+		
 		// Y empezamos a emitirla mientras la sala siga viva
 		PaqueteChat paquete = new PaqueteChat();
 		paquete.setNombreUsuario(this.nombreSala);
@@ -212,15 +216,28 @@ public class Sala extends Thread {
 				sleep(4000);
 				paquete.setMensaje(publi[i]);
 				this.enviarMensaje(paquete);
+				
 				if(i >= this.publi.length -1) i = 0;
 				else i++;
 				
 			} 
-			catch (InterruptedException e) {
+			catch (Exception e) {
 				System.out.println("Error en el bucle de publi de la sala " + 
 						this.nombreSala + ": " + e.getMessage());
+				this.salirSala = true;
 			}
 		}
-		System.out.println("Cerrando la sala " + this.nombreSala);
+		System.out.println("Cerrada la sala " + this.nombreSala);
+	}
+
+	// Para extraer un paquete con los datos de la sala
+	public PaqueteSala getPaqueteSala() {
+		PaqueteSala paquete = new PaqueteSala();
+		paquete.setGrupo(direccion);
+		paquete.setIpRemota(ipEmisor);
+		paquete.setNombre(nombreSala);
+		paquete.setPuerto(puerto);
+		paquete.setTamMaxBuffer(tamMaximoBuffer);
+		return paquete;
 	}
 }
