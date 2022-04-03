@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,6 +26,10 @@ import interfaces.InterfazEntornoGrafico;
 
 
 public abstract class VentanaCliente extends JFrame implements InterfazEntornoGrafico,  ActionListener{
+	/**
+	 * Agregado por el IDE
+	 */
+	private static final long serialVersionUID = 1L;
 	protected JTextField txtNick;
 	protected JTextField txtMensaje;
 	protected JButton btnEnviarNick;
@@ -37,6 +42,9 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	
 	protected JList <String> listadoMensajes;
 	protected JList <String> listadoSalas;
+	
+	protected DefaultListModel<String> modeloMensajes = new DefaultListModel<String>();
+	protected DefaultListModel<String> modeloSalas = new DefaultListModel<String>();
 	
 	/**
 	 * Constructor de la clase
@@ -73,6 +81,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		
 		// Creo el listado y su scroll
 		this.listadoMensajes = new JList<String>();
+		this.listadoMensajes.setModel(this.modeloMensajes);
 		JScrollPane scroll = new JScrollPane(this.listadoMensajes);
 		scroll.setMinimumSize(new Dimension(300,200));
 		scroll.revalidate();
@@ -98,6 +107,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		
 		pSalas.add(new JLabel("Salas Disponibles"));
 		this.listadoSalas = new JList<String>();
+		this.listadoSalas.setModel(this.modeloSalas);
 		JScrollPane scrollSalas = new JScrollPane(this.listadoSalas);
 		scrollSalas.setPreferredSize(new Dimension(100,200));
 		pSalas.add(scrollSalas);

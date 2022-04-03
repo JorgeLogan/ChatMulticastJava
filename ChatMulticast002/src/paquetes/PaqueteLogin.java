@@ -24,7 +24,7 @@ public class PaqueteLogin implements Serializable{
 	// Constructor con el parametro
 	public PaqueteLogin(String nick, boolean desconectar) {
 		this.nick = nick;
-		this.desconectar = false;
+		this.desconectar = desconectar;
 	}
 	
 	// Getters y Setters

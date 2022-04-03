@@ -64,7 +64,7 @@ public class Sala extends Thread {
 			socket.joinGroup(grupo);
 			
 			// Preparamos el flujo de bytes para el envio
-			byte[] paqueteBytes = this.convertirPaquete(paquete);
+			byte[] paqueteBytes = FuncionesConversion.convertirPaquete(paquete);
 					
 			// Enviamos el datagrama con el paqute
 			DatagramPacket datagrama = new DatagramPacket(paqueteBytes, paqueteBytes.length ,this.grupo, this.puerto);
@@ -112,65 +112,13 @@ public class Sala extends Thread {
 			socket.close();
 			
 			// Obtenemos el paquete con la funcion que creamos
-			paquete = this.extraerPaquete(buffer);
+			paquete = FuncionesConversion.extraerPaquete(buffer);
 			
 		} catch (IOException e) {
 			System.out.println("Error al leer el paquete de entrada en la sala " + this.nombreSala 
 					+ ": " + e.getMessage());
 		}
 		
-		return paquete;
-	}
-	
-	public byte[] convertirPaquete(PaqueteChat paquete) {
-		// Preparamos el flujo donde guardar el paquete convertido
-		byte[] buffer = null;
-		
-		// Preparo el objeto de flujo de array de bytes (que nombre)
-		ByteArrayOutputStream objBytesSalida = new ByteArrayOutputStream();
-		
-		// Preparo el ObjectOutput para grabar los datos
-		ObjectOutputStream objSalida;
-		try {
-			objSalida = new ObjectOutputStream(objBytesSalida);	
-			
-			// Grabamos el objecto
-			objSalida.writeObject(paquete);
-			
-			// Pasamos al buffer el flujo leido
-			buffer = objBytesSalida.toByteArray();
-		} 
-		catch (IOException e) {
-			System.out.println("No se pudo convertir el paquete a bytes[] en la sala " 
-					+ this.nombreSala + ": " + e.getMessage());
-		}
-
-		// devolvemos el buffer leido o null si no pudo
-		return buffer;
-	}
-	
-	
-	// Para convertir los bytes leidos en el paquete
-	public PaqueteChat extraerPaquete(byte[] arrayBytes) {
-		
-		PaqueteChat paquete = new PaqueteChat();
-		
-		// Preparamos el array de bytes
-		ByteArrayInputStream arrayEntrada = new ByteArrayInputStream(arrayBytes);
-		
-		// Usamos un flujo de entrada, porque queremos leer de su flujo parametro
-		try {
-			ObjectInputStream objEntrada = new ObjectInputStream(arrayEntrada);
-			
-			// Leemos los datos
-			paquete = (PaqueteChat)objEntrada.readObject();
-		}
-		catch (Exception e) {
-			System.out.println("Error al intentar extraer el paquete de datos de la sala " 
-					+  this.nombreSala + ": " + e.getMessage());
-		}
-		
-		// Grabamos el paquete o null si fallo algo		
 		return paquete;
 	}
 	

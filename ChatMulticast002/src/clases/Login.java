@@ -125,7 +125,6 @@ public class Login extends HiloEscucha implements Serializable{
 			}
 		}
 		// Devolvemos el paquete elaborado
-		System.out.println("La respuesta será: " + respuesta.toString());
 		return respuesta;
 	}
 	
@@ -136,10 +135,7 @@ public class Login extends HiloEscucha implements Serializable{
 		
 		// Y la enviamos al cliente
 		try {
-			System.out.println("Login prepara flujo de salida");
 			this.objSalida = new ObjectOutputStream(sCliente.getOutputStream());
-			
-			System.out.println("Login intenta enviar la respuesta");
 			this.objSalida.writeObject(respuesta);
 			
 			System.out.println("Respuesta enviada " + respuesta.toString());

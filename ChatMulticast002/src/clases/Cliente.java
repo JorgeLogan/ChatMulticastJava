@@ -32,7 +32,8 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	Socket socket = null;
 	ObjectOutputStream objSalida = null;
 	ObjectInputStream objEntrada = null;
-		
+	
+	EscuchaCliente escuchaMulticast = null;
 	
 	public Cliente() {
 		
@@ -74,6 +75,8 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			System.out.println("Hemos recibido respuesta: " + respuesta.toString());
 			if(respuesta.isAceptado()) {
 				this.unirseSala(nickEnvio);
+				
+				this.escuchaMulticast = new EscuchaCliente(respuesta.getPaqueteSala(), this.modeloMensajes);
 			}
 		}
 		else {
@@ -84,7 +87,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	public void salir() {
 		System.out.println("Saliendo de la ventana cliente");
 		this.desconectar();
-		this.dispose();
+		//this.dispose();
 		
 	}
 
@@ -112,23 +115,32 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 
 	public void desconectar() {
 		// Enviamos mensaje al servidor
-		try {
-			this.objSalida.writeObject(new PaqueteLogin(this.txtNick.getText().toString(), true));
-		} catch (IOException e1) {
-			System.out.println("Error en el cliente al intentar enviar un objeto de desconexion al server:"
-					+ e1.getMessage());
+		System.out.println("Estado socket " + this.socket.isConnected());
+		PaqueteLogin paqueteDesconexion = new PaqueteLogin(this.txtNick.getText().toString(), true);
+		this.enviarMensaje(paqueteDesconexion);
+		System.out.println("Enviado mensaje de desconexion");
+			
+		// Cerramos la escucha si la tenemos
+		if(this.escuchaMulticast!= null) {
+			this.escuchaMulticast.cerrarHilo();
 		}
-		
 		// Comprobamos si hemos creado salas
+		this.cerrarSalasPropias();
 		
 		// Cerramos nuestro socket
+		/*
 		try {
 			this.socket.close();
 		} catch (Exception e) {
 			System.out.println("Error intentando cerrar el socket desde el cliente");
 		}
+		*/
 	}
 
+	
+	private void cerrarSalasPropias() {
+		System.out.println("SIN IMPLEMENTAR CERRAR SALAS");
+	}
 	/**
 	 * Método de la interfaz de conexion para enviar mensajes.
 	 * En éste caso, enviaremos paquetes de tipo PaqueteLogin
@@ -136,11 +148,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	@Override
 	public boolean enviarMensaje(PaqueteLogin paquete) {
 		boolean resultado = false;
-		
 		try {
 			this.objSalida = new ObjectOutputStream(this.socket.getOutputStream());
 			this.objSalida.writeObject(paquete);
-			//this.objSalida.close();
+			System.out.println("objeto enviado por el cliente al servidor");
 			resultado = true;
 			
 		} catch (IOException e) {
@@ -187,11 +198,16 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		System.out.println("notd");
 	}
 	
+	/**
+	 * Clase para escuchar los mensajes Multicast
+	 * @author Jorge
+	 *
+	 */
 	public class EscuchaCliente extends HiloEscucha {
 
 		PaqueteSala paquete;
 		InetAddress grupoBase;
-		MulticastSocket socket;
+		MulticastSocket socketMC;
 		InetSocketAddress grupoReceptor;
 		NetworkInterface netInterface;
 		DefaultListModel<String> listado;
@@ -202,20 +218,14 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			
 			try {
 				grupoBase = InetAddress.getByName(p.getGrupo());
-				socket = new MulticastSocket(p.getPuerto());
+				socketMC = new MulticastSocket(p.getPuerto());
 				grupoReceptor = new InetSocketAddress(this.grupoBase, p.getPuerto());
 				netInterface = NetworkInterface.getByName(p.getIpRemota());
 				
 				// Ahora ya podemos unirnos al grupo
-				socket.joinGroup(grupoReceptor, netInterface);
+				socketMC.joinGroup(grupoReceptor, netInterface);
 				
-				
-				
-				// Dejamos el grupo
-				socket.leaveGroup(grupoReceptor, netInterface);
-				
-				// Salimos del multicast
-				socket.close();
+				this.start();
 			} 
 			catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -225,6 +235,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		
 		@Override
 		public void escucha() {
+			System.out.println("Hilo cliente a la escucha multicast...");
 			// Preparamos el tamaño del flujo de bytes
 			byte[] buffer = new byte[this.paquete.getTamMaxBuffer()];
 			
@@ -233,22 +244,33 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			
 			// Esperamos por paquetes en el socket multicast
 			try {
-				socket.receive(datagrama);
-				this.listado.addElement();
-				
+				socketMC.receive(datagrama);
+				String mensaje = FuncionesConversion.extraerPaquete(buffer).getMensaje();
+				this.listado.addElement(mensaje);
+				System.out.println("--> " + mensaje);	
 			} 
 			catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Error o cierre en la escucha del cliente: " + e.getMessage());
 			}			
 		}
 		
-		public String getMensaje(byte[]) {
-			String resultado = "";
+		@Override
+		public void cerrarHilo() {
+			this.salirHilo = true;
 			
+			// Dejamos el grupo
+			try {
+				socketMC.leaveGroup(grupoReceptor, netInterface);
+					
+				// Salimos del multicast
+				socketMC.close();
+			} 
+			catch (IOException e) {
+				System.out.println("Error al cerrar el hilo de escucha multicast: " + e.getMessage());
+			}
 			
-			
-			return resultado;
+			System.out.println("Saliendo del hilo de escucha del cliente");
+
 		}
 	}
 }
