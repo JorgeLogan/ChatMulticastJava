@@ -22,5 +22,10 @@ public class EscuchaSalaModeler extends HiloEscucha{
 		String mensaje = paquete.getNombreUsuario() + "\n\t" + paquete.getMensaje();
 		this.modelo.addElement(mensaje);
 	}
-
+	
+	@Override
+	public void cerrarHilo() {
+		this.salirHilo = true;
+		System.out.println("Hilo de escucha de sala cerrado");
+	}
 }

@@ -53,12 +53,13 @@ public class Login extends HiloEscucha{
 			// Leemos el paquete que envio el cliente a traves del socket
 			PaqueteLogin paqueteRecibido = this.leerPaqueteRecibido(sCliente);
 			
+			System.out.println("Recibido paquete: " + paqueteRecibido.toString());
+			
 			// Y le enviamos lo que corresponda segun este paquete
 			this.enviarRespuesta(paqueteRecibido, sCliente);
 		}
 		catch (Exception e) {
 			System.out.println("Error en el Login al escuchar clientes entrantes: " + e.getMessage());
-			this.cerrarHilo();
 		}
 	}
 	

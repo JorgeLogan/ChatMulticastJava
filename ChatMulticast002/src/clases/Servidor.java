@@ -11,15 +11,11 @@ public class Servidor extends VentanaServidor {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	// Para el control de la sala Agora
+	// Atributos
 	private Sala agora = null;
-	
-	// Para la escucha de mensajes de la sala Agora
-	private EscuchaSalaModeler escuchaAgora = null;
-	
-	// Para el control del login de los clientes
-	private Login login= null;
-	
+	private EscuchaSalaModeler escuchaAgora = null;	// Para la escucha de mensajes de la sala Agora
+	private Login login= null;	// Para el control del login de los clientes
+	private final String direccionGrupo = "225.2.3.4";
 	
 	// Constructor de la clase
 	public Servidor() {
@@ -41,7 +37,7 @@ public class Servidor extends VentanaServidor {
 		*/
 		System.out.println("Pulsado conectar");
 		// Creamos la sala
-		this.agora = new Sala("192.168.0.103", "225.2.3.4", "Sala Agora", 5678, 1000);
+		this.agora = new Sala(InterfazConexion.HOST, this.direccionGrupo, "Sala Agora", 5678, 1000);
 	
 		// Escuchamos la sala
 		this.escuchaAgora = new EscuchaSalaModeler(this.agora, this.modeloMensajes);

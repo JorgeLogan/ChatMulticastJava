@@ -155,7 +155,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 			case "Enviar nick" :
 				System.out.println("Enviar nick pulsado");
 				if(this.txtNick.getText().length() != 0) 
-					this.enviarNick(this.txtNick.getText().trim());
+					this.enviarNick(this.txtNick.getText().toString());
 				else
 					this.enviarNick("usuario chat"); 
 					

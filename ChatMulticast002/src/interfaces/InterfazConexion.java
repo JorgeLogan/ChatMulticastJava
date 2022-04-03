@@ -1,10 +1,20 @@
 package interfaces;
 
-
 import java.net.DatagramPacket;
 import java.net.Socket;
 
-public interface InterfazConexion <T>{
+import paquetes.PaqueteLogin;
+
+
+/**
+ * Interfaz para la conexion. Uso un generico de 2 tipos, porque voy a usar
+ * para el envio, PaqueteLogin, y para la recepcion PaqueteSala
+ * @author Jorge
+ *
+ * @param <T> El paquete con el login al servidor; tambien tiene un booleano para avisar de desconexion
+ * @param <P> El paquete con los datos de la sala si es aceptado, o un booleano que indica que no es aceptado
+ */
+public interface InterfazConexion <T,P>{
 	public final int PUERTO_TCP = 2000;	
 	public final String HOST = "192.168.0.103";
 	
@@ -15,16 +25,7 @@ public interface InterfazConexion <T>{
 	public boolean conectar();
 	public void desconectar();
 	
-	// Para el envio de mensajes por TCP necesitamos sockets. Por TCP envio solo strings (nicks)
-	public boolean enviarMensajeTCP(String mensaje);
-	public boolean enviarMensajeTCP(String mensaje, Socket socketEspecifico);
-	T recibirMensajeTCP(Socket socket);
-	
-	// Para el envio/recepcion de mensajes por UDP Datagramas
-	public boolean enviarMensajeUDP(T mensaje);
-	T recibirMensajeUDP(DatagramPacket datagram);
-	
-	// Para controlar las escuchas del cliente/servidor
-	public void escucha();
-
+	// Para el envío y recepción de mensajes
+	public boolean enviarMensaje(T mensaje); 
+	P recibirMensajeTCP(Socket socket);
 }
