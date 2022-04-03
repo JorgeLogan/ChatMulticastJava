@@ -230,7 +230,10 @@ public class Sala extends Thread {
 		System.out.println("Cerrada la sala " + this.nombreSala);
 	}
 
-	// Para extraer un paquete con los datos de la sala
+	/**
+	 * Para extraer un paquete con los datos de la sala
+	 * @return un objeto de PaqueteSala con los datos de la sala
+	 */
 	public PaqueteSala getPaqueteSala() {
 		PaqueteSala paquete = new PaqueteSala();
 		paquete.setGrupo(direccion);

@@ -3,8 +3,10 @@ package clases;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.List;
 
 import hilos_escucha.HiloEscucha;
@@ -18,7 +20,11 @@ import paquetes.PaqueteSala;
  * @author Jorge
  *
  */
-public class Login extends HiloEscucha{
+public class Login extends HiloEscucha implements Serializable{
+	/**
+	 * Requerido por el id para la serializacion
+	 */
+	private static final long serialVersionUID = 1L;
 	// Atributos
 	private ObjectInputStream objEntrada; // Para el flujo de entrada de los objetos
 	private ObjectOutputStream objSalida; // para el flujo de salida de los objetos
@@ -31,6 +37,10 @@ public class Login extends HiloEscucha{
 	public Login(PaqueteSala paquete, int puertoSocket) {
 		this.paqueteSala = paquete;
 		this.puerto = puertoSocket;
+		
+		// Creamos la lista para los usuarios conectados
+		this.listadoUsuarios = new LinkedList<String>();
+				
 		try {
 			this.serverSocket = new ServerSocket(puerto);			
 			this.start();
@@ -43,12 +53,13 @@ public class Login extends HiloEscucha{
 	/**
 	 * Metodo para la escucha de clientes TCP. Pondremos al hilo a escuchar a sockets entrantes
 	 */
+	Socket sCliente = null;
 	@Override
-	public void escucha() {
+	public synchronized void escucha() {
 		try {
 			System.out.println("Iniciada espera por clientes TCP...");
 			// Escuchamos clientes
-			Socket sCliente = this.serverSocket.accept();
+			sCliente = this.serverSocket.accept();
 		
 			// Leemos el paquete que envio el cliente a traves del socket
 			PaqueteLogin paqueteRecibido = this.leerPaqueteRecibido(sCliente);
@@ -63,6 +74,12 @@ public class Login extends HiloEscucha{
 		}
 	}
 	
+	/**
+	 * Funcion para devolver un paquete de login recibido por un cliente
+	 * @param sCliente el cliente que envia la informacion
+	 * @return un PaqueteLogin con los datos enviados del cliente
+	 * @throws Exception
+	 */
 	private PaqueteLogin leerPaqueteRecibido(Socket sCliente) throws Exception {
 		PaqueteLogin paquete = null;
 		// Si llegamos aqui, es que hemos recibido algo. Asi que desciframos el paquete
@@ -70,6 +87,7 @@ public class Login extends HiloEscucha{
 					
 		// Lo convertimos a nuestra clase de paquete de login
 		paquete = (PaqueteLogin) objEntrada.readObject();
+		
 		return paquete;
 	}
 	
@@ -78,28 +96,36 @@ public class Login extends HiloEscucha{
 		// Preparamos un paquete respuesta para el cliente
 		PaqueteRespuesta respuesta = new PaqueteRespuesta();
 		
+		System.out.println("Elaboraremos respuesta segun el paquete recibido: " + paqueteRecibido.toString());
+		
 		// Comprobamos si el cliente ya existe y se quiere desconectar
 		if(paqueteRecibido.isDesconectar()) {
 			// Preparamos un mensaje de vuelta
+			System.out.println("El cliente quiere desconectar");
 			respuesta.setMensaje("Gracias por tu tiempo! Esperamos verte pronto, " 
 					+ paqueteRecibido.getNick());
 			// Lo eliminamos del listado
 			this.listadoUsuarios.remove(paqueteRecibido.getNick());
 		}
 		else {
+			System.out.println("El cliente quiere logearse");
 			// No se busca desconexion, sino Login, asi que vamos a ver si ya existe el nick
 			if(this.listadoUsuarios.contains(paqueteRecibido.getNick()) == false) {
 				// Aceptado
-				respuesta.setMensaje("Bienvenid@, " + paqueteRecibido.getNick());
+				System.out.println("Aceptado");
 				respuesta.setPaqueteSala(this.paqueteSala);
-				
-			}else {
-				// No se puede aceptar, ya existe el nick
 				respuesta.setMensaje("Bienvenid@, " + paqueteRecibido.getNick());
-				respuesta.setPaqueteSala(null);
+				respuesta.setAceptado(true);
+			}
+			else {
+				// No se puede aceptar, ya existe el nick
+				System.out.println("No aceptado");
+				respuesta.setMensaje("Lo siento, busca otro nick mas Original!!");
+				respuesta.setAceptado(false);
 			}
 		}
 		// Devolvemos el paquete elaborado
+		System.out.println("La respuesta será: " + respuesta.toString());
 		return respuesta;
 	}
 	
@@ -110,8 +136,13 @@ public class Login extends HiloEscucha{
 		
 		// Y la enviamos al cliente
 		try {
+			System.out.println("Login prepara flujo de salida");
 			this.objSalida = new ObjectOutputStream(sCliente.getOutputStream());
+			
+			System.out.println("Login intenta enviar la respuesta");
 			this.objSalida.writeObject(respuesta);
+			
+			System.out.println("Respuesta enviada " + respuesta.toString());
 		} 
 		catch (IOException e) {
 			System.out.println("Error al enviar datos al cliente. Le cierro el socket");

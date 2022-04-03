@@ -43,4 +43,12 @@ public class PaqueteLogin implements Serializable{
 	public void setDesconectar(boolean desconectar) {
 		this.desconectar = desconectar;
 	}
+	
+	/*
+	 * Para visualizar los datos
+	 */
+	@Override
+	public String toString() {
+		return "Nick: " + this.getNick() + "  Quiere desconectar: " + this.isDesconectar();
+	}
 }

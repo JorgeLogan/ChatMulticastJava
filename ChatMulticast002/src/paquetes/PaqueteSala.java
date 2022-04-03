@@ -9,7 +9,6 @@ public class PaqueteSala implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 	// Atributos para la sala
 	private String nombre;
 	private String grupo;
@@ -70,4 +69,10 @@ public class PaqueteSala implements Serializable{
 	public void setTamMaxBuffer(int tamMaxBuffer) {
 		this.tamMaxBuffer = tamMaxBuffer;
 	}	
+
+	@Override
+	public String toString() {
+		return "Nombre: " + this.getNombre() + " IP Remota: " + this.getIpRemota() + " Direccion: " + this.getGrupo()
+			+ " Puerto: " + this.getPuerto() + " Tam maximo: " + this.getTamMaxBuffer();
+	}
 }

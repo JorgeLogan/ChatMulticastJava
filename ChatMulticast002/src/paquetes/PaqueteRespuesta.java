@@ -44,4 +44,12 @@ public class PaqueteRespuesta implements Serializable{
 		this.paqueteSala = paquete;
 	}
 	
+	@Override
+	public String toString() {
+		String salida = "Mensaje: " + this.getMensaje() + " Aceptado: " + this.isAceptado();
+		if(this.paqueteSala!= null) {
+			salida += " Paquete: " + this.getPaqueteSala().toString();
+		}
+		return salida;
+	}
 }
