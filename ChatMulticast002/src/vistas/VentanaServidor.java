@@ -1,7 +1,5 @@
 package vistas;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -17,8 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
-import interfaces.InterfazEntornoGrafico;
-
 public abstract  class VentanaServidor extends JFrame implements  ActionListener, WindowListener{
 	
 	/**
@@ -30,11 +26,11 @@ public abstract  class VentanaServidor extends JFrame implements  ActionListener
 	protected JButton btnConectar;
 	protected JButton btnDesconectar;
 	protected JButton btnSalir;
-	protected JList <JLabel>listadoMensajes;
+	protected JList <String>listadoMensajes;
 	protected JList <String>listadoUsuarios;
 	
 	// Para agregar elementos a los listados usamos modelos
-	protected DefaultListModel<JLabel> modeloMensajes;
+	protected DefaultListModel<String> modeloMensajes;
 	protected DefaultListModel<String> modeloUsuarios;
 	
 	private JScrollPane scrollMensajes;
@@ -82,11 +78,11 @@ public abstract  class VentanaServidor extends JFrame implements  ActionListener
 		pMensajes.add(pMensajesVert);
 		pMensajesVert.add(new JLabel("Mensajes"));
 		// Cremo el panel de mensajes
-		this.listadoMensajes = new JList<JLabel>();
-		this.modeloMensajes = new DefaultListModel<JLabel>();
+		this.listadoMensajes = new JList<String>();
+		this.modeloMensajes = new DefaultListModel<String>();
 		this.listadoMensajes.setModel(modeloMensajes);
 		this.scrollMensajes = new JScrollPane(this.listadoMensajes);
-		this.scrollMensajes.setPreferredSize(new Dimension(400,300));
+		this.scrollMensajes.setPreferredSize(new Dimension(500,300));
 		pMensajesVert.add(this.scrollMensajes);
 		
 		// Creo un panel para los usuarios

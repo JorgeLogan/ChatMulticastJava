@@ -10,9 +10,9 @@ import paquetes.PaqueteChat;
 public class EscuchaSalaModeler extends HiloEscucha{
 	// Sala a escuchar
 	private Sala sala = null;
-	private DefaultListModel<JLabel> modelo;
+	private DefaultListModel<String> modelo;
 	
-	public EscuchaSalaModeler(Sala sala, DefaultListModel<JLabel> modelo) {
+	public EscuchaSalaModeler(Sala sala, DefaultListModel<String> modelo) {
 		this.sala = sala;
 		this.modelo = modelo;
 	}
@@ -26,7 +26,7 @@ public class EscuchaSalaModeler extends HiloEscucha{
 		System.out.println("---------------> recibo " + paquete.getMensaje());
 		String mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), paquete.getMensaje());
 		System.out.println("Intentamos poner en el JList --> " + mensaje);
-		this.modelo.addElement(new JLabel(mensaje));
+		this.modelo.addElement(mensaje);
 	}
 	
 	@Override
