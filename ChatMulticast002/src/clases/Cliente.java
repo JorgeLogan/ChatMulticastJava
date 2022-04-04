@@ -363,9 +363,16 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			// Esperamos por paquetes en el socket multicast
 			try {
 				socketMC.receive(datagrama);
+				String emisor = FuncionesConversion.extraerPaquete(buffer).getNombreUsuario();System.out.println("Mi nick: " + nick + " emisor: " + emisor);
 				String mensaje = FuncionesConversion.extraerPaquete(buffer).getMensaje();
-				this.listado.addElement(mensaje);
-				System.out.println("--> " + mensaje);	
+				
+				if(nick.equals(emisor) == false) { // Si no es el mismo emisor, agrego el nick (si no, ya lo trae de serie)
+					this.listado.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));	
+				}else {
+					this.listado.addElement(mensaje);
+				}
+				
+				System.out.println("Recibo por MultiCast -----> " + emisor + "--> " + mensaje);	
 			} 
 			catch (IOException e) {
 				System.out.println("Error o cierre en la escucha del cliente: " + e.getMessage());

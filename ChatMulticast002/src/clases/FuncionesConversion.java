@@ -61,6 +61,7 @@ public class FuncionesConversion {
 
 	// Para transformar un código plano en u código formateado tipo HTML con negrita, etc...
 	public static String cadenaHTML(String nombre, String mensaje) {
-		return "<html><body> <font color='red'>  <b>" + nombre + " dice:</b> </font> <br> &nbsp &nbsp &nbsp &nbsp <i> " + mensaje + "</i></body></html>";
+		return "<html><head><meta charset=\"UTF-8\"></head><body> <font color='red'>  <b>" + nombre + " dice:</b> </font> <br> &nbsp &nbsp &nbsp &nbsp <i> "
+				+ mensaje + "</i></body></html>";
 	}
 }

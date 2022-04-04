@@ -129,14 +129,16 @@ public class Sala extends Thread {
 	
 	private void crearPubli() {
 		this.publi = new String[] {
-				"Bienvenid@ al chat " + this.nombreSala + " en el puerto " + this.puerto 
+				Emojis.RISAS + "&nbsp; Bienvenid@ al chat &nbsp;" + Emojis.RISAS + "<br>" 
+					+ this.nombreSala + " en el puerto " + this.puerto 
 					+ " en la direccion " + this.direccion + " en el emisor " + this.ipEmisor 
 					+ " con un tamaño de mensaje de " + this.tamMaximoBuffer + " bytes!!",
 			"Chat " + this.nombreSala + " en el puerto " + this.puerto + " con un tamaño de " 
 					+ this.tamMaximoBuffer + " maximo",
-			"Chat " + this.nombreSala + " tu chat!!",
+			"Chat " + this.nombreSala + " tu chat!!" + Emojis.CORAZON,
 			"Disfuta del chat " + this.nombreSala + ", el mejor chat de todos!",
-			"Chat " + this.nombreSala + " el unico que no tiene mensajes automáticos!!"
+			"Chat " + this.nombreSala + " el unico que no tiene mensajes automáticos!!",
+			"Blablabla... ¿Eres una cotorra?? &nbsp ESTE ES TU SITIO!!" + Emojis.ENCANTADO
 		};
 	}
 	

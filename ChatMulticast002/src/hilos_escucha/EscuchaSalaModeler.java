@@ -1,26 +1,32 @@
 package hilos_escucha;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 
+import clases.FuncionesConversion;
 import clases.Sala;
 import paquetes.PaqueteChat;
 
 public class EscuchaSalaModeler extends HiloEscucha{
 	// Sala a escuchar
 	private Sala sala = null;
-	private DefaultListModel modelo;
+	private DefaultListModel<JLabel> modelo;
 	
-	public EscuchaSalaModeler(Sala sala, DefaultListModel modelo) {
+	public EscuchaSalaModeler(Sala sala, DefaultListModel<JLabel> modelo) {
 		this.sala = sala;
 		this.modelo = modelo;
 	}
 	
 	@Override
 	public void escucha() {
-		
+		// Nos ponemos a la escucha en la sala...
 		PaqueteChat paquete = sala.escucharMensaje();
-		String mensaje = paquete.getNombreUsuario() + "\n\t" + paquete.getMensaje();
-		this.modelo.addElement(mensaje);
+		
+		// Recibimos el paquete! Lo muestro por consola, lo convierto a fomato HTML y lo paso al JLabel
+		System.out.println("---------------> recibo " + paquete.getMensaje());
+		String mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), paquete.getMensaje());
+		System.out.println("Intentamos poner en el JList --> " + mensaje);
+		this.modelo.addElement(new JLabel(mensaje));
 	}
 	
 	@Override

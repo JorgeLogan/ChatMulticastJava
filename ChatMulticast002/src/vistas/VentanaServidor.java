@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 
 import interfaces.InterfazEntornoGrafico;
 
-public abstract  class VentanaServidor extends JFrame implements InterfazEntornoGrafico, ActionListener, WindowListener{
+public abstract  class VentanaServidor extends JFrame implements  ActionListener, WindowListener{
 	
 	/**
 	 * Version pedida por el IDE
@@ -131,30 +131,7 @@ public abstract  class VentanaServidor extends JFrame implements InterfazEntorno
 	public abstract void clickSalir();
 
 	
-	//**********************************************************************************************
-	//
-	//		METODOS IMPLEMENTADOS PARA LA INTERFAZ DEL ENTORNO GRAFICO
-	//
-	//**********************************************************************************************
 
-
-	@Override
-	public void escribirTexto(Object texto, boolean propio) {
-		System.out.println("Debo escribir: " + texto);
-		JLabel mensaje = new JLabel(texto.toString());
-		if(propio) mensaje.setForeground(Color.green);
-		else mensaje.setForeground(Color.blue);
-		
-		this.listadoMensajes.add(mensaje);
-		this.listadoMensajes.repaint();		
-	}
-
-	
-	@Override
-	public void limpiarAreaTexto() {
-		this.listadoMensajes.removeAll();
-		
-	}
 
 	
 	//**********************************************************************************************
