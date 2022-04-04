@@ -58,5 +58,9 @@ public class FuncionesConversion {
 		// Grabamos el paquete o null si fallo algo		
 		return paquete;
 	}
-	
+
+	// Para transformar un código plano en u código formateado tipo HTML con negrita, etc...
+	public static String cadenaHTML(String nombre, String mensaje) {
+		return "<html><body> <font color='red'>  <b>" + nombre + " dice:</b> </font> <br> &nbsp &nbsp &nbsp &nbsp <i> " + mensaje + "</i></body></html>";
+	}
 }

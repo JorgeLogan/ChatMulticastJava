@@ -1,5 +1,7 @@
 package clases;
 
+import java.awt.event.WindowEvent;
+
 import hilos_escucha.EscuchaSalaModeler;
 import interfaces.InterfazConexion;
 import paquetes.PaqueteSala;
@@ -22,7 +24,10 @@ public class Servidor extends VentanaServidor {
 		this.gestionControles(false);
 	}
 	
-	// para la funcion ejecutable de la clase
+	/**
+	 * Funcion para hacer ejecutable la clase Servidor
+	 * @param args no se usará ningún parámetro
+	 */
 	public static void main(String[] args) {
 		new Servidor();
 	}
@@ -56,6 +61,12 @@ public class Servidor extends VentanaServidor {
 	@Override
 	public void clickDesconectar() {
 		System.out.println("Pulsado desconectar");
+		
+		// Limpiamos los mensajes y los usuarios (se acabó lo que se daba)
+		this.modeloMensajes.clear();
+		this.modeloUsuarios.clear();
+		
+		// Cerramos la sala agora nada mas podamos
 		if(agora!= null) {
 			System.out.println("Cerrando sala Agora...");
 			agora.cerrarSala();
@@ -85,9 +96,21 @@ public class Servidor extends VentanaServidor {
 		this.dispose();
 	}
 
+	/**
+	 * Funcion para gestionar los controles según la conexión
+	 * @param conectado indica si es para modo conectado o desconectado
+	 */
 	private void gestionControles(boolean conectado) {
 		this.btnConectar.setEnabled(!conectado);
 		this.btnDesconectar.setEnabled(conectado);
 	}
 	
+	/**
+	 * Para la gestion del cierre de ventana
+	 */
+	@Override
+	public void windowClosing(WindowEvent e) {
+		System.out.println("Cerrando ventana servidor");
+		this.clickDesconectar();
+	}
 }

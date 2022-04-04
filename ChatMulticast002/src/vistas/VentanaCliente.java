@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -25,7 +27,7 @@ import javax.swing.JTextField;
 import interfaces.InterfazEntornoGrafico;
 
 
-public abstract class VentanaCliente extends JFrame implements InterfazEntornoGrafico,  ActionListener{
+public abstract class VentanaCliente extends JFrame implements InterfazEntornoGrafico<String>,  ActionListener, WindowListener{
 	/**
 	 * Agregado por el IDE
 	 */
@@ -34,6 +36,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	protected JTextField txtMensaje;
 	protected JButton btnEnviarNick;
 	protected JButton btnEnviarMensaje;
+	protected JButton btnDesconectar;
 	protected JButton btnSalir;
 	
 	protected JButton btnCrearSala;
@@ -119,28 +122,32 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		
 		pBotones.add(new JLabel(""));
 		
-		this.btnCrearSala = new JButton("Crear sala");
+		this.btnCrearSala = new JButton(" Crear sala ");
 		this.btnCrearSala.addActionListener(this);
 		pBotones.add(this.btnCrearSala);
 		
 		pBotones.add(new JLabel (" "));
 		
-		this.btnUnirseSala = new JButton("    Unirse   ");
+		this.btnUnirseSala = new JButton("     Unirse    ");
 		this.btnUnirseSala.setActionCommand("Unirse");
 		this.btnUnirseSala.addActionListener(this);
 		pBotones.add(this.btnUnirseSala);
 		
 		pBotones.add(new JLabel(" "));
 		
-		this.btnBorrarSala = new JButton("    Borrar   ");
+		this.btnBorrarSala = new JButton("     Borrar    ");
 		this.btnBorrarSala.setActionCommand("Borrar");
 		this.btnBorrarSala.addActionListener(this);
 		pBotones.add(this.btnBorrarSala);
 
 		pBotones.add(new JLabel(" "));
 		pBotones.add(new JLabel(" "));
+		this.btnDesconectar = new JButton("Desconectar");
+		this.btnDesconectar.addActionListener(this);
+		pBotones.add(this.btnDesconectar);
+		pBotones.add(new JLabel(" "));
 		
-		this.btnSalir = new JButton("      Salir    ");
+		this.btnSalir = new JButton("         Salir       ");
 		this.btnSalir.setActionCommand("Salir");
 		this.btnSalir.addActionListener(this);
 		pBotones.add(this.btnSalir);
@@ -150,9 +157,10 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		this.pack();
 		this.setVisible(true);
 		this.setResizable(false);
+		
+		// Agregamos el escuchador de ventana
+		this.addWindowListener(this);
 	}
-
-	
 	
 	/**
 	 * Metodo de la interfaz ActionListener para escuchar los botones
@@ -164,15 +172,16 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		switch(e.getActionCommand().toString()) {
 			case "Enviar nick" :
 				System.out.println("Enviar nick pulsado");
-				if(this.txtNick.getText().length() != 0) 
-					this.enviarNick(this.txtNick.getText().toString());
-				else
-					this.enviarNick("usuario chat"); 
+				this.enviarNick(this.txtNick.getText().toString());
 					
 				break;
 			case "Enviar mensaje" :
 				System.out.println("Enviar mensaje pulsado");
-				this.enviarMensaje(this.txtMensaje.toString().trim());
+				if(this.txtMensaje.getText().length() > 0) {
+					String cadena = this.txtMensaje.getText().trim();
+					this.enviarMensaje(cadena);					
+				}
+
 				break;
 			case "Crear sala" :
 				System.out.println("Crear sala pulsado");
@@ -187,6 +196,10 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 				System.out.println("Borrar pulsado");
 				this.borrarSala(this.listadoSalas.getSelectedValue());
 				break;
+			case "Desconectar" :
+				System.out.println("Desconectar pulsado");
+				clickDesconectar();
+				break;
 			case "Salir" :
 				System.out.println("Salir pulsado");
 				salir();
@@ -200,6 +213,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	public abstract void crearSala();
 	public abstract void unirseSala(String valor);
 	public abstract void borrarSala(String valor);
+	public abstract void clickDesconectar();
 	public abstract void salir();
 
 	/*****************************************************************************************************
@@ -208,7 +222,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	 * @param propio indica si el mensaje a escribir lo crea el propio usuario
 	 */
 	@Override
-	public void escribirTexto(Object texto, boolean propio) {
+	public void escribirTexto(String texto, boolean propio) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -218,7 +232,29 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	 */
 	@Override
 	public void limpiarAreaTexto() {
-		this.listadoMensajes.removeAll();
-		
+		this.listadoMensajes.removeAll();	
 	}
+	
+	/******************************************************************************************
+	 * 
+	 * Metodos vacios para el listener de ventanas
+	 * 
+	 * ****************************************************************************************
+	 */
+	@Override
+	public void windowOpened(WindowEvent e) {}
+	@Override
+	public void windowClosed(WindowEvent e) {}
+
+	@Override
+	public void windowIconified(WindowEvent e) {}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+
+	@Override
+	public void windowActivated(WindowEvent e) {}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
 }
