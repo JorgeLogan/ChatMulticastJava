@@ -30,13 +30,13 @@ public abstract  class VentanaServidor extends JFrame implements InterfazEntorno
 	protected JButton btnDesconectar;
 	protected JButton btnSalir;
 	protected JList <JLabel>listadoMensajes;
-	protected JList <JLabel>listadoUsuarios;
-	protected JList <JLabel>listadoSalas;
+	protected JList <String>listadoUsuarios;
+	protected JList <String>listadoSalas;
 	
 	// Para agregar elementos a los listados usamos modelos
 	protected DefaultListModel<JLabel> modeloMensajes;
-	protected DefaultListModel<JLabel> modeloUsuarios;
-	protected DefaultListModel<JLabel> modeloSalas;
+	protected DefaultListModel<String> modeloUsuarios;
+	protected DefaultListModel<String> modeloSalas;
 	
 	private JScrollPane scrollMensajes;
 	private JScrollPane scrollUsuarios;
@@ -100,8 +100,8 @@ public abstract  class VentanaServidor extends JFrame implements InterfazEntorno
 		pUsuariosVert.setLayout(new BoxLayout(pUsuariosVert, BoxLayout.Y_AXIS));
 		pUsuarios.add(pUsuariosVert);
 		pUsuariosVert.add(new JLabel("Clientes conectados"));
-		this.listadoUsuarios = new JList<JLabel>();
-		this.modeloUsuarios = new DefaultListModel<JLabel>();
+		this.listadoUsuarios = new JList<String>();
+		this.modeloUsuarios = new DefaultListModel<String>();
 		this.listadoUsuarios.setModel(modeloUsuarios);
 		this.scrollUsuarios = new JScrollPane(this.listadoUsuarios);
 		this.scrollUsuarios.setPreferredSize(new Dimension(200,300));
@@ -116,8 +116,8 @@ public abstract  class VentanaServidor extends JFrame implements InterfazEntorno
 		// Creo el elemento para las salas
 		pSalas.add(pSalasVert);
 		pSalasVert.add(new JLabel("Salas disponibles"));
-		this.listadoSalas = new JList<JLabel>();
-		this.modeloSalas = new DefaultListModel<JLabel>();
+		this.listadoSalas = new JList<String>();
+		this.modeloSalas = new DefaultListModel<String>();
 		this.listadoSalas.setModel(modeloSalas);
 		this.scrollSalas = new JScrollPane(this.listadoSalas);
 		this.scrollSalas.setPreferredSize(new Dimension(200,275));

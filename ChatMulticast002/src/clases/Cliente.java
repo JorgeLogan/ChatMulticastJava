@@ -32,11 +32,13 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	Socket socket = null;
 	ObjectOutputStream objSalida = null;
 	ObjectInputStream objEntrada = null;
+	boolean conectado = false; // Para que al salir, si esta conectado, libere su nick del server
 	
 	EscuchaCliente escuchaMulticast = null;
 	
 	public Cliente() {
-		
+		// Ponemos los botones en modo de conexion desconectado
+		this.gestionBotonesConexion();
 	}
 	
 	/**
@@ -74,9 +76,12 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			
 			System.out.println("Hemos recibido respuesta: " + respuesta.toString());
 			if(respuesta.isAceptado()) {
+				this.conectado = true;
+				this.gestionBotonesConexion();
 				this.unirseSala(nickEnvio);
-				
 				this.escuchaMulticast = new EscuchaCliente(respuesta.getPaqueteSala(), this.modeloMensajes);
+			}else {
+				JOptionPane.showMessageDialog(this,respuesta.getMensaje());
 			}
 		}
 		else {
@@ -86,9 +91,9 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 
 	public void salir() {
 		System.out.println("Saliendo de la ventana cliente");
-		this.desconectar();
-		//this.dispose();
 		
+		this.desconectar();
+		this.dispose();
 	}
 
 	/**
@@ -114,8 +119,22 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	}
 
 	public void desconectar() {
-		// Enviamos mensaje al servidor
-		System.out.println("Estado socket " + this.socket.isConnected());
+		// Enviamos mensaje al servidor si estamos conectados, si no, salimos directamente
+		if(this.conectado == false) return;
+		
+		// Si llegamos aquí, es que estamos conectados, asi que cambiamos eso
+		System.out.println("Enviando mensaje de desconexion al servidor");
+		try {
+			this.socket = new Socket(this.HOST, this.PUERTO_TCP);
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		PaqueteLogin paqueteDesconexion = new PaqueteLogin(this.txtNick.getText().toString(), true);
 		this.enviarMensaje(paqueteDesconexion);
 		System.out.println("Enviado mensaje de desconexion");
@@ -123,18 +142,21 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		// Cerramos la escucha si la tenemos
 		if(this.escuchaMulticast!= null) {
 			this.escuchaMulticast.cerrarHilo();
+			this.escuchaMulticast = null;
 		}
 		// Comprobamos si hemos creado salas
 		this.cerrarSalasPropias();
 		
-		// Cerramos nuestro socket
-		/*
+		// Cerramos socket
 		try {
 			this.socket.close();
 		} catch (Exception e) {
 			System.out.println("Error intentando cerrar el socket desde el cliente");
 		}
-		*/
+		
+		// Por ultimo gestionamos el booleano de conexión y los componentes
+		this.conectado = false;
+		this.gestionBotonesConexion();
 	}
 
 	
@@ -193,9 +215,25 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	}
 
 
+	/**
+	 * Funcion para el click del envio de mensajes multicast una vez conectado
+	 */
 	@Override
 	public void enviarMensaje(String nickEnvio) {
 		System.out.println("notd");
+	}
+	
+	/**
+	 * Funcion para gestionar los botones segun la conexion
+	 */
+	public void gestionBotonesConexion() {
+		this.btnEnviarNick.setEnabled(!conectado);
+		this.txtNick.setEnabled(!conectado);
+		this.btnEnviarMensaje.setEnabled(conectado);
+		this.txtMensaje.setEnabled(conectado);
+		this.btnCrearSala.setEnabled(conectado);
+		this.btnUnirseSala.setEnabled(conectado);
+		this.btnBorrarSala.setEnabled(conectado);
 	}
 	
 	/**
@@ -254,6 +292,9 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			}			
 		}
 		
+		/**
+		 * Funcion sobreescrita del hilo de escucha para cerrar el hilo mejor 
+		 */
 		@Override
 		public void cerrarHilo() {
 			this.salirHilo = true;
@@ -270,7 +311,6 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			}
 			
 			System.out.println("Saliendo del hilo de escucha del cliente");
-
 		}
 	}
 }

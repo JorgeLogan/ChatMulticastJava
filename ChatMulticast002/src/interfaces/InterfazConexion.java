@@ -16,7 +16,7 @@ import paquetes.PaqueteLogin;
  */
 public interface InterfazConexion <T,P>{
 	public final int PUERTO_TCP = 2000;	
-	public final String HOST = "192.168.0.103";
+	public final String HOST = "localhost";//"192.168.0.103";
 	
 	// Creo este mensaje de texto para que en TCP se sepa si se quiere cerrar conexion
 	public final String MENSAJE_DESCONEXION = "Cerrar conexion";

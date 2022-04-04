@@ -47,7 +47,7 @@ public class Servidor extends VentanaServidor {
 		// Preparamos un paquete para la sala de Agora
 		PaqueteSala pSala = this.agora.getPaqueteSala();
 		System.out.println("Paquete de sala agora: " + pSala.toString());
-		this.login = new Login(pSala, InterfazConexion.PUERTO_TCP);
+		this.login = new Login(pSala, InterfazConexion.PUERTO_TCP, this.modeloUsuarios);
 
 		// Ponemos los controles en modo conectado
 		this.gestionControles(true);
