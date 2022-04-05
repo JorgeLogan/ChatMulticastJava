@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -12,6 +13,7 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,21 +38,33 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 
 	// Atributos
 	private String nick;
-	Socket socket = null;
-	ObjectOutputStream objSalida = null;
-	ObjectInputStream objEntrada = null;
-	boolean conectado = false; // Para que al salir, si esta conectado, libere su nick del server
+	private Socket socket = null;
+	private ObjectOutputStream objSalida = null;
+	private ObjectInputStream objEntrada = null;
+	private boolean conectado = false; // Para que al salir, si esta conectado, libere su nick del server
 	
-	EscuchaCliente escuchaMulticast = null;
+	// Para la escucha de UDP cree una clase al final de esta, que hereda de HiloEscucha
+	private EscuchaCliente escuchaMulticast = null;
 	
+	// Para el paquete de la sala en la que estamos chateando
 	PaqueteSala paqueteSalaActual;
 	
-	// Para las salas que crea el usuario (y eliminarlas cuando cierre)
-	List<Sala> listaSalasUsuario = new LinkedList<Sala>(); 
+	// Creamos un objeto de tipo SalasDisponibles para acceder a sus metodos y su listado estatico
+	private SalasDisponibles salasDisponibles;
 	
+	// Creo un listado de las salas que creo yo mismo para cerrarlas al salir
+	private List<Sala> misSalas = new LinkedList<Sala>(); 
+	
+	/*****************************************************************************************
+	 * Constructor de la clase
+	 * 
+	 * ***************************************************************************************
+	 */
 	public Cliente() {
 		// Ponemos los botones en modo de conexion desconectado
 		this.gestionBotonesConexion();
+		
+		
 	}
 	
 	/**
@@ -78,6 +92,9 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		if(this.conectar()) {
 			System.out.println("Cliente conectado OK al servidor! Enviando paquete login...");
 			
+			// Gestionamos las salas disponibles
+			this.gestionSalasDisponibles();
+						
 			// Enviamos el paquete
 			this.enviarMensaje(new PaqueteLogin(nickEnvio, false));			
 			System.out.println("Paquete login enviado desde el cliente. Esperando respuesta...");
@@ -117,6 +134,20 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	}
 
 	/**
+	 * Para crear y configurar la gestion de salas
+	 */
+	private void gestionSalasDisponibles() {
+		// Creamos el objeto de salas disponibles
+		this.salasDisponibles = new SalasDisponibles();
+				
+		// Asociamos el listado de salas a el listado
+		this.listadoSalas.setModel(SalasDisponibles.salasDisponibles);
+		System.out.println("Tenemos " + SalasDisponibles.salasDisponibles.getSize() + " salas disponibles");
+				
+		this.salasDisponibles.visualizarSalasConsola();
+	}
+	
+	/**
 	 * Enviaremos peticion de conexion al servidor
 	 */
 	public boolean conectar() {
@@ -145,7 +176,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		// Si llegamos aquí, es que estamos conectados, asi que cambiaremos eso...
 		// empiezo limpiando los areas
 		this.modeloMensajes.clear();
-		this.modeloSalas.clear();
+		//this.modeloSalas.clear();
 		
 		System.out.println("Enviando mensaje de desconexion al servidor");
 		try {
@@ -217,7 +248,36 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	 */
 	@Override
 	public void crearSala() {
-		System.out.println("SIN IMPLEMENTAR");
+		System.out.println("----------------------------------------------------------------------------------------");
+		PaqueteSala paqueteNuevo = new PaqueteSala();
+		paqueteNuevo.setCreador(nick);
+		
+		paqueteNuevo.setNombre(JOptionPane.showInputDialog("Escribe el nombre de la nueva sala"));
+		if(paqueteNuevo.getNombre() == null) return;
+		
+		paqueteNuevo.setGrupo(JOptionPane.showInputDialog("Escribe la direccion tipo D donde estará el grupo"));
+		if(paqueteNuevo.getGrupo() == null) return;
+		
+		paqueteNuevo.setIpRemota(JOptionPane.showInputDialog("Escribe la direccion IP del equipo servidor"));
+		if(paqueteNuevo.getIpRemota() == null) return;
+		
+		try {
+			paqueteNuevo.setPuerto(Integer.parseInt(JOptionPane.showInputDialog("Escribe el puerto de escucha")));
+			if(paqueteNuevo.getPuerto() == 0) return;
+			paqueteNuevo.setPuerto(Integer.parseInt(JOptionPane.showInputDialog("Escribe el puerto de escucha")));
+			paqueteNuevo.setTamMaxBuffer(Integer.parseInt(JOptionPane.showInputDialog("Escribe el tamaño máximo del paquete")));
+			if(paqueteNuevo.getTamMaxBuffer() == 0) return;
+
+			// Si llegamos aqui, todos los valores son "validos" (no hago comprobaciones, se toma todo por válido)
+			
+			
+		}catch(Exception e) {
+			//JOptionPane.showMessageDialog(this, "Valores no validos: " + e.getMessage());
+			System.out.println("Valores nulos no validos, asi que se sale de la función sin crear sala");
+			return;
+		}
+
+		
 	}
 
 	@Override
@@ -230,8 +290,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		System.out.println("SIN IMPLEMENTAR");		
 	}
 
-	/**
+	/*************************************************************************************************
 	 * Sobreescritura de la funcion de click de desconexion de la interfaz grafica
+	 * 
+	 * ***********************************************************************************************
 	 */
 	@Override
 	public void clickDesconectar() {
@@ -244,8 +306,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	 *  
 	 *  *****************************************************************************************************
 	 */
-	/**
+	/*******************************************************************************************
 	 * Metodo para recibir mensajes por TCP en el formato de PaqueteRespuesta
+	 * 
+	 * *****************************************************************************************
 	 */
 	@Override
 	public PaqueteRespuesta recibirMensajeTCP(Socket socket) {
@@ -261,8 +325,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	}
 
 
-	/**
+	/********************************************************************************************
 	 * Funcion para el click del envio de mensajes multicast una vez conectado
+	 * 
+	 * ******************************************************************************************
 	 */
 	@Override
 	public void enviarMensaje(String cadena) {
@@ -301,8 +367,9 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	
 	
 	
-	/**
+	/***************************************************************************************************
 	 * Funcion para gestionar los botones segun la conexion
+	 * *************************************************************************************************
 	 */
 	public void gestionBotonesConexion() {
 		this.btnEnviarNick.setEnabled(!conectado);
@@ -312,8 +379,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		this.btnCrearSala.setEnabled(conectado);
 		this.btnUnirseSala.setEnabled(conectado);
 		this.btnBorrarSala.setEnabled(conectado);
-	}
-	
+	}	
 
 	
 	/****************************************************************************************************
@@ -401,8 +467,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		}
 	}
 	
-	/**
+	/****************************************************************************************************
 	 * Implementación del metodo de cerrar ventana
+	 * 
+	 * **************************************************************************************************
 	 */
 	@Override
 	public void windowClosing(WindowEvent e) {

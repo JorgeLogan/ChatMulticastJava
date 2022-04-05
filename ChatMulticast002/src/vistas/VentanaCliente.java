@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import interfaces.InterfazEntornoGrafico;
+import paquetes.PaqueteSala;
 
 
 public abstract class VentanaCliente extends JFrame implements InterfazEntornoGrafico<String>,  ActionListener, WindowListener{
@@ -44,10 +45,11 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	protected JButton btnBorrarSala;
 	
 	protected JList <String> listadoMensajes;
-	protected JList <String> listadoSalas;
+	//protected JList <String> listadoSalas;
+	protected JList <PaqueteSala> listadoSalas;
 	
 	protected DefaultListModel<String> modeloMensajes = new DefaultListModel<String>();
-	protected DefaultListModel<String> modeloSalas = new DefaultListModel<String>();
+	//protected DefaultListModel<String> modeloSalas = new DefaultListModel<String>();
 	
 	/**
 	 * Constructor de la clase
@@ -109,8 +111,8 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		pGeneral.add(pSalas);
 		
 		pSalas.add(new JLabel("Salas Disponibles"));
-		this.listadoSalas = new JList<String>();
-		this.listadoSalas.setModel(this.modeloSalas);
+		this.listadoSalas = new JList<PaqueteSala>();
+		//this.listadoSalas.setModel(this.modeloSalas);
 		JScrollPane scrollSalas = new JScrollPane(this.listadoSalas);
 		scrollSalas.setPreferredSize(new Dimension(100,200));
 		pSalas.add(scrollSalas);
@@ -123,6 +125,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		pBotones.add(new JLabel(""));
 		
 		this.btnCrearSala = new JButton(" Crear sala ");
+		this.btnCrearSala.setActionCommand("Crear sala");
 		this.btnCrearSala.addActionListener(this);
 		pBotones.add(this.btnCrearSala);
 		
@@ -189,12 +192,12 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 				break;
 			case "Unirse" :
 				System.out.println("Unirse pulsado");
-				this.unirseSala(this.listadoSalas.getSelectedValue());
+				//this.unirseSala(this.listadoSalas.getSelectedValue());
 				break;
 		
 			case "Borrar" :
 				System.out.println("Borrar pulsado");
-				this.borrarSala(this.listadoSalas.getSelectedValue());
+				//this.borrarSala(this.listadoSalas.getSelectedValue());
 				break;
 			case "Desconectar" :
 				System.out.println("Desconectar pulsado");

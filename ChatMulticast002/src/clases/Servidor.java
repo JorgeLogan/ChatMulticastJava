@@ -14,6 +14,7 @@ public class Servidor extends VentanaServidor {
 	private static final long serialVersionUID = 1L;
 	
 	// Atributos
+	private String nick = "Servidor";
 	private Sala agora = null;
 	private EscuchaSalaModeler escuchaAgora = null;	// Para la escucha de mensajes de la sala Agora
 	private Login login= null;	// Para el control del login de los clientes
@@ -21,6 +22,7 @@ public class Servidor extends VentanaServidor {
 	
 	// Constructor de la clase
 	public Servidor() {
+		super();
 		this.gestionControles(false);
 	}
 	
@@ -42,10 +44,12 @@ public class Servidor extends VentanaServidor {
 		*/
 		System.out.println("Pulsado conectar");
 		// Creamos la sala
-		this.agora = new Sala(InterfazConexion.HOST, this.direccionGrupo, "Sala Agora", 5678, 1000);
+		this.agora = new Sala(this.nick ,InterfazConexion.HOST, this.direccionGrupo, "Sala Agora", 5678, 1000);
 	
-		// Escuchamos la sala
+		// Escuchamos la sala Agora en el listado de mensajes a traves del modelo
 		this.escuchaAgora = new EscuchaSalaModeler(this.agora, this.modeloMensajes);
+		
+		// Iniciamos el hilo de escucha
 		this.escuchaAgora.start();
 		
 		// Ahora nos preparamos para la escucha de clientes
@@ -65,7 +69,7 @@ public class Servidor extends VentanaServidor {
 		// Limpiamos los mensajes y los usuarios (se acabó lo que se daba)
 		this.modeloMensajes.clear();
 		this.modeloUsuarios.clear();
-		
+			
 		// Cerramos la sala agora nada mas podamos
 		if(agora!= null) {
 			System.out.println("Cerrando sala Agora...");
@@ -76,6 +80,7 @@ public class Servidor extends VentanaServidor {
 			System.out.println("Cerrando hilo de escucha de la sala Agora en el Servidor...");
 			escuchaAgora.cerrarHilo();
 		}
+		
 		
 		if(login!= null) {
 			System.out.println("Cerrando hilo login....");

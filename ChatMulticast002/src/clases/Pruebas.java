@@ -6,8 +6,9 @@ public class Pruebas extends Thread{
 	Sala sala = null;
 	
 	public Pruebas(){
+		
 		try {
-			sala = new Sala("localhost","225.13.14.15", "Sala de pruebas", 6671, 1000);
+			sala = new Sala("Pruebas","localhost","225.13.14.15", "Sala de pruebas", 6671, 1000);
 			this.start();
 		} catch (Exception e) {
 			System.out.println("No se pudo crear la sala");
@@ -28,7 +29,6 @@ public class Pruebas extends Thread{
 			}
 		}
 		if(sala != null) sala.cerrarSala();
-		System.out.println("Saliendo de la sala");
-		
+		System.out.println("Saliendo de la sala");		
 	}
 }

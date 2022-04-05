@@ -127,13 +127,11 @@ public abstract  class VentanaServidor extends JFrame implements  ActionListener
 	public abstract void clickSalir();
 
 	
-
-
-	
 	//**********************************************************************************************
 	//
 	//		METODOS IMPLEMENTADOS PARA LA INTERFAZ DEL MANEJO DE VENTANAS
-	//		Solo necesito uno, para que el cierre se haga correctamente
+	//		Solo necesito uno, para que el cierre se haga correctamente y lo coloco
+	//		en la clase final
 	//
 	//**********************************************************************************************
 	

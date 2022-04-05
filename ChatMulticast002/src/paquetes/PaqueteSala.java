@@ -10,6 +10,7 @@ public class PaqueteSala implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	// Atributos para la sala
+	private String creador; // Para eliminarla, solo puede su creador
 	private String nombre;
 	private String grupo;
 	private String ipRemota;
@@ -20,8 +21,9 @@ public class PaqueteSala implements Serializable{
 	public PaqueteSala() {}
 	
 	// Constructor con parametros
-	public PaqueteSala(String nombre, String grupo, String ipRemota, int puerto, int tamMaxBuffer) {
+	public PaqueteSala(String creador, String nombre, String grupo, String ipRemota, int puerto, int tamMaxBuffer) {
 		super();
+		this.creador = creador;
 		this.nombre = nombre;
 		this.grupo = grupo;
 		this.ipRemota = ipRemota;
@@ -30,6 +32,14 @@ public class PaqueteSala implements Serializable{
 	}
 
 	// Getters y Setters
+	public String getCreador() {
+		return creador;
+	}
+
+	public void setCreador(String creador) {
+		this.creador = creador;
+	}
+	
 	public String getNombre() {
 		return nombre;
 	}

@@ -1,9 +1,6 @@
 package clases;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -15,12 +12,14 @@ import paquetes.PaqueteChat;
 import paquetes.PaqueteSala;
 
 /**
- * La sala con los metodos que necesita para ser mas independiente
+ * La sala con los metodos que necesita para ser mas independiente.
+ * Tambien se encarga de pasar la propia sala al listado de salas disponibles
  * @author Jorge
  *
  */
 public class Sala extends Thread {
 	// Atributos para la sala
+	private String creador;
 	private InetAddress grupo;
 	private String direccion;
 	private String ipEmisor;
@@ -35,18 +34,28 @@ public class Sala extends Thread {
 	// Se deben crear despues de configurar la clase.
 	private String[] publi; 
 	
-	public Sala(String ip, String direccionGrupo, String nombreSala, int puerto, int tamMaximoBuffer) {
+	// Para poder agregar la sala al listado de salas disponibles
+	SalasDisponibles salas = new SalasDisponibles();
+	
+	public Sala(String creador, String ip, String direccionGrupo, String nombreSala, int puerto, int tamMaximoBuffer) {
 		super();
 		try {
+			this.creador = creador;
 			this.ipEmisor = ip;
 			this.direccion = direccionGrupo;
 			this.grupo = InetAddress.getByName(direccionGrupo);
 			this.nombreSala = nombreSala;
 			this.puerto = puerto;
 			this.tamMaximoBuffer = tamMaximoBuffer;	
+						
+			// Pasamos la sala a las salas disponibles
+			salas.agregarPaqueteSala(this.getPaqueteSala());
 			
 			// Abrimos el hilo
 			this.start();
+		
+
+		
 		} 
 		catch (UnknownHostException e) {
 			System.out.println("No se pudo crear/conectar la sala: " + e.getMessage() );
@@ -155,21 +164,20 @@ public class Sala extends Thread {
 		// Y empezamos a emitirla mientras la sala siga viva
 		PaqueteChat paquete = new PaqueteChat();
 		paquete.setNombreUsuario(this.nombreSala);
-		paquete.setMensaje(this.publi[0]);
-		this.enviarMensaje(paquete);
-		
+
 		// Preparamos un indice para ir pasando los mensajes
-		int i= 1; // ya que el cero acabamos de enviarlo
+		int i= 0; 
 		
 		while(this.salirSala == false) {
 			try {
-				sleep(4000);
+				
 				paquete.setMensaje(publi[i]);
 				this.enviarMensaje(paquete);
 				
 				if(i >= this.publi.length -1) i = 0;
 				else i++;
 				
+				sleep(8000);
 			} 
 			catch (Exception e) {
 				System.out.println("Error en el bucle de publi de la sala " + 
@@ -178,6 +186,9 @@ public class Sala extends Thread {
 			}
 		}
 		System.out.println("Cerrada la sala " + this.nombreSala);
+		
+		// Sacamos la sala del listado
+		this.salas.borrarPaqueteSala(getPaqueteSala());
 	}
 
 	/**
@@ -186,6 +197,7 @@ public class Sala extends Thread {
 	 */
 	public PaqueteSala getPaqueteSala() {
 		PaqueteSala paquete = new PaqueteSala();
+		paquete.setCreador(creador);
 		paquete.setGrupo(direccion);
 		paquete.setIpRemota(ipEmisor);
 		paquete.setNombre(nombreSala);
