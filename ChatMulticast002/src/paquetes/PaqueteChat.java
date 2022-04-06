@@ -1,6 +1,8 @@
 package paquetes;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 public class PaqueteChat implements Serializable {
 	/**
@@ -9,7 +11,8 @@ public class PaqueteChat implements Serializable {
 	private static final long serialVersionUID = 1L;
 	// Atributos del cliente
 	private String nombreUsuario;
-	private String mensaje;	
+	private String mensaje;
+	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
 	
 	// Constructores
 	public PaqueteChat() {}

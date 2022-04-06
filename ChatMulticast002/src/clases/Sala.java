@@ -33,10 +33,7 @@ public class Sala extends Thread {
 	// Tendra mensajes de publicidad cada poco para darle vida.
 	// Se deben crear despues de configurar la clase.
 	private String[] publi; 
-	
-	// Para poder agregar la sala al listado de salas disponibles
-	SalasDisponibles salas = new SalasDisponibles();
-	
+		
 	public Sala(String creador, String ip, String direccionGrupo, String nombreSala, int puerto, int tamMaximoBuffer) {
 		super();
 		try {
@@ -47,14 +44,9 @@ public class Sala extends Thread {
 			this.nombreSala = nombreSala;
 			this.puerto = puerto;
 			this.tamMaximoBuffer = tamMaximoBuffer;	
-						
-			// Pasamos la sala a las salas disponibles
-			salas.agregarPaqueteSala(this.getPaqueteSala());
-			
+									
 			// Abrimos el hilo
 			this.start();
-		
-
 		
 		} 
 		catch (UnknownHostException e) {
@@ -186,9 +178,6 @@ public class Sala extends Thread {
 			}
 		}
 		System.out.println("Cerrada la sala " + this.nombreSala);
-		
-		// Sacamos la sala del listado
-		this.salas.borrarPaqueteSala(getPaqueteSala());
 	}
 
 	/**

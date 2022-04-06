@@ -48,11 +48,8 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	
 	// Para el paquete de la sala en la que estamos chateando
 	PaqueteSala paqueteSalaActual;
-	
-	// Creamos un objeto de tipo SalasDisponibles para acceder a sus metodos y su listado estatico
-	private SalasDisponibles salasDisponibles;
-	
-	// Creo un listado de las salas que creo yo mismo para cerrarlas al salir
+		
+	// Creo un listado de las salas que hay
 	private List<Sala> misSalas = new LinkedList<Sala>(); 
 	
 	/*****************************************************************************************
@@ -137,14 +134,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	 * Para crear y configurar la gestion de salas
 	 */
 	private void gestionSalasDisponibles() {
-		// Creamos el objeto de salas disponibles
-		this.salasDisponibles = new SalasDisponibles();
-				
-		// Asociamos el listado de salas a el listado
-		this.listadoSalas.setModel(SalasDisponibles.salasDisponibles);
-		System.out.println("Tenemos " + SalasDisponibles.salasDisponibles.getSize() + " salas disponibles");
-				
-		this.salasDisponibles.visualizarSalasConsola();
+		System.out.println("SIN IMPLEMENTAR");
 	}
 	
 	/**
