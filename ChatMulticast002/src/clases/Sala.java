@@ -34,6 +34,7 @@ public class Sala extends Thread {
 	// Se deben crear despues de configurar la clase.
 	private String[] publi; 
 		
+	// Constructor con los parametros
 	public Sala(String creador, String ip, String direccionGrupo, String nombreSala, int puerto, int tamMaximoBuffer) {
 		super();
 		try {
@@ -55,7 +56,32 @@ public class Sala extends Thread {
 		}
 	}
 
-	// Para enviar mensajes a la sala
+	// Constructor a base de paquete de sala
+	public Sala(PaqueteSala paquete) {
+		super();
+		try {
+			this.creador = paquete.getCreador();
+			this.ipEmisor = paquete.getIpRemota();
+			this.direccion = paquete.getGrupo();
+			this.grupo = InetAddress.getByName(this.direccion);
+			this.nombreSala = paquete.getNombre();
+			this.puerto = paquete.getPuerto();
+			this.tamMaximoBuffer = paquete.getTamMaxBuffer();	
+									
+			// Abrimos el hilo
+			this.start();
+		
+		} 
+		catch (UnknownHostException e) {
+			System.out.println("No se pudo crear/conectar la sala: " + e.getMessage() );
+			this.salirSala = true;
+		}
+	}
+	
+	/**
+	 * Para enviar mensajes a la sala
+	 * @param paquete el paquete de datos que enviaremos
+	 */
 	public void enviarMensaje(PaqueteChat paquete) {
 		try {
 			// Preparamos el multicast
@@ -80,7 +106,11 @@ public class Sala extends Thread {
 		}
 	}
 
-	// para recibir mensajes de la sala
+	/**
+	 * Para la funcion de escucha mensajes, que seran de tipo PaqueteChat
+	 * 
+	 * @return un paquete chat con los datos recibidos
+	 */
 	public PaqueteChat escucharMensaje() {
 		// Preparamos el paquete a devolver
 		PaqueteChat paquete = new PaqueteChat();
@@ -128,6 +158,9 @@ public class Sala extends Thread {
 		this.salirSala = true;
 	}
 	
+	/**
+	 * Clase para darle vida al chat sin estar escirbiendo en los clientes constantemente
+	 */
 	private void crearPubli() {
 		this.publi = new String[] {
 				Emojis.RISAS + "&nbsp; Bienvenid@ al chat &nbsp;" + Emojis.RISAS + "<br>" 

@@ -23,6 +23,10 @@ public class PaqueteChat implements Serializable {
 		this.mensaje = mensaje;
 	}
 	
+	public PaqueteChat(List<PaqueteSala> listado) {
+		this.salasDisponibles = listado;
+	}
+	
 	// Getters y Setters
 	public String getNombreUsuario() {
 		return nombreUsuario;

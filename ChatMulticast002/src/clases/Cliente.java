@@ -52,8 +52,8 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	PaqueteSala paqueteSalaActual;
 		
 	// Y creo un diccionario de las salas disponibles
-	private Map<String, PaqueteSala> salasDisponibles = new HashMap<String, PaqueteSala>();
-	
+	//private Map<String, PaqueteSala> salasDisponibles = new HashMap<String, PaqueteSala>();
+	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
 	/*****************************************************************************************
 	 * Constructor de la clase
 	 * 
@@ -148,10 +148,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	private void leerSalas(List<PaqueteSala> lista) {
 		for(PaqueteSala paquete : lista){
 			System.out.println("===> Leo de la lista del servidor la sala " + paquete.toString());
-			this.salasDisponibles.put(paquete.getNombre(), paquete);
+			this.salasDisponibles.add(paquete);
 			this.modeloSalas.addElement(paquete.getNombre());
 		}
-		this.paqueteSalaActual = this.salasDisponibles.get("Sala Agora");
+		this.paqueteSalaActual = this.salasDisponibles.get(0);
 		System.out.println("Paquete actual del cliente --> " + this.paqueteSalaActual.toString());
 	}
 	
@@ -249,6 +249,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			this.objSalida = new ObjectOutputStream(this.socket.getOutputStream());
 			this.objSalida.writeObject(paquete);
 			System.out.println("objeto enviado por el cliente al servidor");
+			
 			resultado = true;
 			
 		} catch (IOException e) {
@@ -284,17 +285,40 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			if(paqueteNuevo.getTamMaxBuffer() == 0) return;
 
 			// Si llegamos aqui, todos los valores son "validos" (no hago comprobaciones, se toma todo por válido)
-			
-			
-		}catch(Exception e) {
+			// lo unico que voy a comprobar es que no exista esa sala en el listado
+			if(existeSala(paqueteNuevo.getNombre())) {
+				JOptionPane.showMessageDialog(this, "Lo siento, ya existe una sala con ese nombre. Salimos");
+			}
+			else {
+				// Agregamos el paquete a nuestro listado de salas
+				this.salasDisponibles.add(paqueteNuevo);
+				
+				// La pasamos a nuestro listado visual de salas
+				this.modeloMensajes.addElement(paqueteNuevo.getNombre());
+				
+				// Creamos un paqueteChat para enviar a los clientes actuales
+				PaqueteChat pc = new PaqueteChat(this.salasDisponibles);
+				this.enviarMensaje(pc);
+				
+				// Creamos un paqueteLogin para avisar al servidor para los clientes nuevos que llegen despues
+				PaqueteLogin pl = new PaqueteLogin(paqueteNuevo);
+				this.enviarMensaje(pl);
+			}
+		}
+		catch(Exception e) {
 			//JOptionPane.showMessageDialog(this, "Valores no validos: " + e.getMessage());
 			System.out.println("Valores nulos no validos, asi que se sale de la función sin crear sala");
 			return;
-		}
-
-		
+		}	
 	}
 
+	
+	public boolean existeSala(String nombreSala) {
+		return !this.salasDisponibles.contains(nombreSala);
+	}
+	
+	
+	
 	@Override
 	public void unirseSala(String valor) {
 		System.out.println("SIN IMPLEMENTAR");		
@@ -347,7 +371,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	 */
 	@Override
 	public void enviarMensaje(String cadena) {
-
+		
+		// Limpiamos el area de texto de envio de mensajes
+		this.txtMensaje.setText("");
+		
 		try {
 			// Preparamos el multicast
 			int puerto = this.paqueteSalaActual.getPuerto();
@@ -447,11 +474,16 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				String emisor = FuncionesConversion.extraerPaquete(buffer).getNombreUsuario();System.out.println("Mi nick: " + nick + " emisor: " + emisor);
 				String mensaje = FuncionesConversion.extraerPaquete(buffer).getMensaje();
 				
-				if(nick.equals(emisor) == false) { // Si no es el mismo emisor, agrego el nick (si no, ya lo trae de serie)
+				// Pasamos el mensaje al listado, poniendole cabecera si no la tiene (busqueda de bugs, ejem)
+				if(mensaje.contains("dice:") == false) { // Si no tiene el indicador de nick, agrego el nick
 					this.listado.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));	
 				}else {
 					this.listado.addElement(mensaje);
 				}
+				
+				// COmprobamos que no tengamos un listado enorme para no gastar mucha memoria
+				if(this.listado.size() > 10) this.listado.remove(0);
+				
 				
 				System.out.println("Recibo por MultiCast -----> " + emisor + "--> " + mensaje);	
 			} 
