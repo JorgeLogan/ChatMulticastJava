@@ -1,6 +1,8 @@
 package clases;
 
 import java.awt.event.WindowEvent;
+import java.util.LinkedList;
+import java.util.List;
 
 import hilos_escucha.EscuchaSalaModeler;
 import interfaces.InterfazConexion;
@@ -52,11 +54,11 @@ public class Servidor extends VentanaServidor {
 		// Iniciamos el hilo de escucha
 		this.escuchaAgora.start();
 		
-		// Ahora nos preparamos para la escucha de clientes
-		// Preparamos un paquete para la sala de Agora
-		PaqueteSala pSala = this.agora.getPaqueteSala();
-		System.out.println("Paquete de sala agora: " + pSala.toString());
-		this.login = new Login(pSala, InterfazConexion.PUERTO_TCP, this.modeloUsuarios);
+		// Ahora nos preparamos para la escucha de clientes con el objeto de login, que se pondra a la escucha de clientes
+		// Preparo el listado de salas
+		List<PaqueteSala> salas = new LinkedList<PaqueteSala>();
+		salas.add(this.agora.getPaqueteSala());
+		this.login = new Login(salas, InterfazConexion.PUERTO_TCP, this.modeloUsuarios);
 
 		// Ponemos los controles en modo conectado
 		this.gestionControles(true);

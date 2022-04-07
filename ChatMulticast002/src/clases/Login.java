@@ -18,7 +18,9 @@ import paquetes.PaqueteRespuesta;
 import paquetes.PaqueteSala;
 
 /**
- * Clase para el servidor que se ponga a la escucha de nuevos clientes
+ * Clase para el servidor que se ponga a la escucha de nuevos clientes. Tambien la reutilizo para 
+ * el envio de salas nuevas por parte del cliente. 
+ * Asi el servidor conoce las salas nuevas para clientes nuevos
  * @author Jorge
  *
  */
@@ -30,15 +32,15 @@ public class Login extends HiloEscucha implements Serializable{
 	// Atributos
 	private ObjectInputStream objEntrada; // Para el flujo de entrada de los objetos
 	private ObjectOutputStream objSalida; // para el flujo de salida de los objetos
-	private PaqueteSala paqueteSala; // El paquete con los datos que recibiran los clientes aceptados
+	private List<PaqueteSala> paquetesSala; // El paquete con los datos que recibiran los clientes aceptados
 	private ServerSocket serverSocket;
 	private int puerto;
-	//private List<String> listadoUsuarios;
+
 	private DefaultListModel<String> listaUsuarios;
 	
 	// Constructor
-	public Login(PaqueteSala paquete, int puertoSocket, DefaultListModel<String> listaUsuarios) {
-		this.paqueteSala = paquete;
+	public Login(List<PaqueteSala> paquetes, int puertoSocket, DefaultListModel<String> listaUsuarios) {
+		this.paquetesSala = paquetes;
 		this.puerto = puertoSocket;
 		this.listaUsuarios = listaUsuarios;
 		
@@ -69,6 +71,9 @@ public class Login extends HiloEscucha implements Serializable{
 			
 			System.out.println("Recibido paquete en el Login: " + paqueteRecibido.toString());
 			
+			// Comprobamos si tiene salas incluidas (el cliente al crear una sala enviara un paquete con la nueva sala
+			this.leerSalasNuevas(paqueteRecibido);
+			
 			// Y le enviamos lo que corresponda segun este paquete
 			this.enviarRespuesta(paqueteRecibido, sCliente);
 			
@@ -95,6 +100,27 @@ public class Login extends HiloEscucha implements Serializable{
 		return paquete;
 	}
 	
+	// Para leer si el cliente envia salas en su login
+	private void leerSalasNuevas(PaqueteLogin paquete) {
+		// EN el caso de que haya sala nueva, vamos a realizar la comprobacion de que exista una con ese nombre
+		// y en caso contrario, se agregará a nuestro listado de salas
+		if(paquete.getPaqueteSalaNueva()!= null) {
+			
+			// Comprobamos si ya existe una sala en nuestro listado
+			boolean existe = false;
+			for(int i=0; i<this.paquetesSala.size() && existe == false; i++) {
+				if(this.paquetesSala.get(i).getNombre() == paquete.getPaqueteSalaNueva().getNombre()) {
+					existe = true;
+				}
+			}
+			
+			// Si existe es cierto, no podemos agregar la sala, en caso contrario, la agregamos a nuestro listado
+			// Esto servirá a los clientes nuevos. A los existentes, les avisará el propio creador de la sala con un
+			// mensaje específico
+			if(existe == false) this.paquetesSala.add(paquete.getPaqueteSalaNueva());
+		}
+	}
+	
 	// Preparamos un paquete respuesta segun el paquete recibido
 	private PaqueteRespuesta elaborarRespuesta(PaqueteLogin paqueteRecibido) {
 		// Preparamos un paquete respuesta para el cliente
@@ -112,21 +138,30 @@ public class Login extends HiloEscucha implements Serializable{
 			this.listaUsuarios.removeElement(paqueteRecibido.getNick());
 		}
 		else {
-			System.out.println("El cliente quiere logearse");
+			System.out.println("El cliente quiere logearse o envia una sala nueva");
 			// No se busca desconexion, sino Login, asi que vamos a ver si ya existe el nick
-			if(this.listaUsuarios.contains(paqueteRecibido.getNick()) == false) {
+			if(this.listaUsuarios.contains(paqueteRecibido.getNick()) == false &&
+					paqueteRecibido.getPaqueteSalaNueva() == null) {
 				// Aceptado
 				System.out.println("Aceptado");
 				this.listaUsuarios.addElement(paqueteRecibido.getNick());
-				respuesta.setPaqueteSala(this.paqueteSala);
+				respuesta.setPaquetesSala(this.paquetesSala);
 				respuesta.setMensaje("Bienvenid@, " + paqueteRecibido.getNick());
 				respuesta.setAceptado(true);
 			}
 			else {
-				// No se puede aceptar, ya existe el nick
-				System.out.println("No aceptado");
-				respuesta.setMensaje("Lo siento, busca otro nick mas Original!!");
-				respuesta.setAceptado(false);
+				if(paqueteRecibido.getPaqueteSalaNueva() == null) {
+					// No se puede aceptar, ya existe el nick
+					System.out.println("No aceptado");
+					respuesta.setMensaje("Lo siento, busca otro nick mas Original!!");
+					respuesta.setAceptado(false);					
+				}
+				else {
+					System.out.println("Sala gestionada");
+					respuesta.setMensaje("Sala gestionada");
+					respuesta.setAceptado(true); // Ya esta aceptado, pero no queremos que lo desconecte
+				}
+
 			}
 		}
 		// Devolvemos el paquete elaborado
@@ -135,6 +170,7 @@ public class Login extends HiloEscucha implements Serializable{
 	
 	// Funcion para enviar mensajes a los clientes
 	private void enviarRespuesta(PaqueteLogin paqueteRecibido, Socket sCliente) {
+		
 		// Preparamos la respuesta segun lo que requiera el paquete
 		PaqueteRespuesta respuesta = this.elaborarRespuesta(paqueteRecibido);
 		System.out.println("paquete respuesta extraido--> " + respuesta.toString());

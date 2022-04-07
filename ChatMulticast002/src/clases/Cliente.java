@@ -14,8 +14,10 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
@@ -49,8 +51,8 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	// Para el paquete de la sala en la que estamos chateando
 	PaqueteSala paqueteSalaActual;
 		
-	// Creo un listado de las salas que hay
-	private List<Sala> misSalas = new LinkedList<Sala>(); 
+	// Y creo un diccionario de las salas disponibles
+	private Map<String, PaqueteSala> salasDisponibles = new HashMap<String, PaqueteSala>();
 	
 	/*****************************************************************************************
 	 * Constructor de la clase
@@ -108,11 +110,19 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			if(respuesta.isAceptado()) {
 				this.nick = this.txtNick.getText().toString().trim();
 				this.conectado = true;
+				
+				// Cogemos los paquetes de la sala, e iniciamos escucha
+				this.leerSalas(respuesta.getPaquetesSala());
+				
+				// Configuramos los controles a modo conextado
 				this.gestionBotonesConexion();
+				
+				// Nos unimos a la sala
 				this.unirseSala(nickEnvio);
 				
-				// Cogemos el paquete de la sala, e iniciamos escucha
-				this.paqueteSalaActual = respuesta.getPaqueteSala();
+				
+				
+				// Preparamos la escucha
 				this.escuchaMulticast = new EscuchaCliente(this.paqueteSalaActual, this.modeloMensajes);
 			}else {
 				JOptionPane.showMessageDialog(this,respuesta.getMensaje());
@@ -130,6 +140,21 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		this.dispose();
 	}
 
+	/**
+	 * Para el login, cogemos del paquete de respuesta el listado de paquetes de sala
+	 * y lo pasamos a nuestro diccionario, y al jlist de salas en formato string
+	 * @param lista
+	 */
+	private void leerSalas(List<PaqueteSala> lista) {
+		for(PaqueteSala paquete : lista){
+			System.out.println("===> Leo de la lista del servidor la sala " + paquete.toString());
+			this.salasDisponibles.put(paquete.getNombre(), paquete);
+			this.modeloSalas.addElement(paquete.getNombre());
+		}
+		this.paqueteSalaActual = this.salasDisponibles.get("Sala Agora");
+		System.out.println("Paquete actual del cliente --> " + this.paqueteSalaActual.toString());
+	}
+	
 	/**
 	 * Para crear y configurar la gestion de salas
 	 */

@@ -27,6 +27,11 @@ public class EscuchaSalaModeler extends HiloEscucha{
 		String mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), paquete.getMensaje());
 		System.out.println("Intentamos poner en el JList --> " + mensaje);
 		this.modelo.addElement(mensaje);
+		
+		// Para no tener un modeler demasiado largo, si pasa cierto numero de mensajes, borramos de los primeros
+		if(this.modelo.size() > 20) {
+			this.modelo.removeRange(0, 10);
+		}
 	}
 	
 	@Override

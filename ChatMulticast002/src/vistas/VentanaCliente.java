@@ -49,7 +49,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	protected JList <PaqueteSala> listadoSalas;
 	
 	protected DefaultListModel<String> modeloMensajes = new DefaultListModel<String>();
-	//protected DefaultListModel<String> modeloSalas = new DefaultListModel<String>();
+	protected DefaultListModel<String> modeloSalas = new DefaultListModel<String>();
 	
 	/**
 	 * Constructor de la clase

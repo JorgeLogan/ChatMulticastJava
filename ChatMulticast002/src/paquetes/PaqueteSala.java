@@ -1,6 +1,8 @@
 package paquetes;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 public class PaqueteSala implements Serializable{
 
@@ -16,6 +18,16 @@ public class PaqueteSala implements Serializable{
 	private String ipRemota;
 	private int puerto;
 	private int tamMaxBuffer;
+	
+	/**
+	 * La idea en este paquete tambien es incluir un listado de las salas disponibles
+	 * Cuando se envie este mensaje, se emitira en un mensaje solo para las salas disponibles
+	 * Dependiendo del tamaño que vea en las pruebas del paquete de solo salas, igual envio todo
+	 * en el mismo paquete, o igual envio 2 seguidos, uno con mensaje del cliente, y otro con sus
+	 * salas, aun no lo tengo seguro. L verdad es que me parece que me estoy pasando enviando datos,
+	 * pero no se me ocurre otra forma
+	 */
+	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
 	
 	// Constructor vacio
 	public PaqueteSala() {}
