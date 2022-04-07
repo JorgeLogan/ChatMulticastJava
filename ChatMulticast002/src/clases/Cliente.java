@@ -298,7 +298,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				
 				// Creamos un paqueteChat para enviar a los clientes actuales
 				PaqueteChat pc = new PaqueteChat(this.salasDisponibles);
-				this.enviarMensaje(pc);
+				//this.enviarMensaje(pc);
 				
 				// Creamos un paqueteLogin para avisar al servidor para los clientes nuevos que llegen despues
 				PaqueteLogin pl = new PaqueteLogin(paqueteNuevo);
