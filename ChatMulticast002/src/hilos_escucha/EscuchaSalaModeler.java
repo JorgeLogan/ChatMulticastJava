@@ -50,8 +50,19 @@ public class EscuchaSalaModeler extends HiloEscucha{
 				this.salasDisponibles.add(paquete.getNuevaSala());								
 			}
 			else {
-				this.salasDisponibles.remove(paquete.getNuevaSala());
+				//this.salasDisponibles.remove(paquete.getNuevaSala());
+				// El sistema sencillo para borrar no me funciona, asi que recorro un bucle
+				for(int i=0;i<this.salasDisponibles.size(); i++) {
+					if(this.salasDisponibles.get(i).getNombre().equals(paquete.getNuevaSala().getNombre())) {
+						this.salasDisponibles.remove(i);
+					}
+				}
+				
+				
 				System.out.println("------------------------------------------borramos sala " + paquete.getNuevaSala().getNombre());
+				for(int i=0;i<this.salasDisponibles.size(); i++) {
+					System.out.println("  ----> " + i + " -->" +  this.salasDisponibles.get(i).getNombre() );
+				}
 			}
 
 		}

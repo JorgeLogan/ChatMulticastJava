@@ -425,10 +425,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		for(int i=0; i<this.misSalas.size() && encontrada == false; i++) {
 			
 			if(this.misSalas.get(i).getPaqueteSala().getNombre().equals(valor)) {
-				
-				this.misSalas.get(i).cerrarSala();
-				this.salasDisponibles.remove(valor);
-				
+							
 				// Preparamos un paquete chat para los usuarios conectador
 				PaqueteChat paquete = new PaqueteChat();
 				paquete.setNombreUsuario(this.nick);
@@ -445,6 +442,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				pLogin.setBorrar(true);
 				this.enviarMensaje(pLogin); // Avisamos al servidor
 				
+				// Ya podemos cerrar y borrar
+				this.misSalas.get(i).cerrarSala();
+				this.salasDisponibles.remove(valor);
+				
 				// Mostramos mensaje de aviso
 				JOptionPane.showMessageDialog(this, "Sala borrada");
 				encontrada = true; // Salimos del bucle
@@ -452,7 +453,6 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			
 			// Si no la encontramos, no es nuestra
 			if(encontrada == false) JOptionPane.showMessageDialog(this, "No puedes borrar una sala que no es tuya");
-			
 		}
 	}
 
@@ -634,17 +634,20 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			// Esperamos por paquetes en el socket multicast
 			try {
 				socketMC.receive(datagrama);
+				
 				String emisor = FuncionesConversion.extraerPaquete(buffer).getNombreUsuario();
+				
 				System.out.println("Mi nick: " + nick + " emisor: " + emisor);
 				String mensaje = FuncionesConversion.extraerPaquete(buffer).getMensaje();
 				
 				// Pasamos el mensaje al listado, poniendole cabecera si no la tiene (busqueda de bugs, ejem)
 				// Aunque puede ser que el paquete recibido, solo quiera informar de una sala nueva!! En ese caso el formato es distinto
 				if(mensaje.contains("dice:") == false) { // Si no tiene el indicador de nick, agrego el nick
-					this.listadoMensajes.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));	
-				}else {
-					this.listadoMensajes.addElement(mensaje);
+					if(mensaje.contains("SALA") == false) this.listadoMensajes.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));
 					
+				}else {
+					if(mensaje.contains("SALA") == true) {}
+					else this.listadoMensajes.addElement(mensaje);
 				}
 				
 				// Buscamos si en el paquete recibido, tenemos salas nuevas
