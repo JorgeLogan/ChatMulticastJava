@@ -70,6 +70,8 @@ public class PaqueteLogin implements Serializable{
 	 */
 	@Override
 	public String toString() {
-		return "Nick: " + this.getNick() + "  Quiere desconectar: " + this.isDesconectar();
+		String salida =  "Nick: " + this.getNick() + "  Quiere desconectar: " + this.isDesconectar();
+		if(this.getPaqueteSalaNueva()!= null) salida += " Sala nueva " + this.getPaqueteSalaNueva().toString(); 
+		return salida;
 	}
 }

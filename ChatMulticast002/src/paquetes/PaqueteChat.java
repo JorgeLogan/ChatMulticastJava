@@ -12,7 +12,8 @@ public class PaqueteChat implements Serializable {
 	// Atributos del cliente
 	private String nombreUsuario;
 	private String mensaje;
-	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
+	//private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
+	private PaqueteSala nuevaSala = null;
 	
 	// Constructores
 	public PaqueteChat() {}
@@ -22,9 +23,16 @@ public class PaqueteChat implements Serializable {
 		this.nombreUsuario = nombreUsuario;
 		this.mensaje = mensaje;
 	}
-	
+	/*
 	public PaqueteChat(List<PaqueteSala> listado) {
 		this.salasDisponibles = listado;
+	}
+	*/
+	
+	public PaqueteChat(String usuario, PaqueteSala sala) {
+		this.nombreUsuario = usuario;
+		this.nuevaSala = sala;
+		this.mensaje = "SALA";
 	}
 	
 	// Getters y Setters
@@ -43,4 +51,14 @@ public class PaqueteChat implements Serializable {
 	public void setMensaje(String mensaje) {
 		this.mensaje = mensaje;
 	}
+
+	public PaqueteSala getNuevaSala() {
+		return nuevaSala;
+	}
+
+	public void setNuevaSala(PaqueteSala nuevaSala) {
+		this.nuevaSala = nuevaSala;
+	}
+	
+	
 }

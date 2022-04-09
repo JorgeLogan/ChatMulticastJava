@@ -148,6 +148,7 @@ public class Sala extends Thread {
 		} catch (IOException e) {
 			System.out.println("Error al leer el paquete de entrada en la sala " + this.nombreSala 
 					+ ": " + e.getMessage());
+			paquete = null; // Devuelvo null para que de una excepcion fuera
 		}
 		
 		return paquete;
@@ -202,7 +203,7 @@ public class Sala extends Thread {
 				if(i >= this.publi.length -1) i = 0;
 				else i++;
 				
-				sleep(8000);
+				sleep(15000);
 			} 
 			catch (Exception e) {
 				System.out.println("Error en el bucle de publi de la sala " + 

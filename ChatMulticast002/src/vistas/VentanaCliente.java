@@ -46,7 +46,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	
 	protected JList <String> listadoMensajes;
 	//protected JList <String> listadoSalas;
-	protected JList <PaqueteSala> listadoSalas;
+	protected JList <String> listadoSalas;
 	
 	protected DefaultListModel<String> modeloMensajes = new DefaultListModel<String>();
 	protected DefaultListModel<String> modeloSalas = new DefaultListModel<String>();
@@ -111,8 +111,8 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		pGeneral.add(pSalas);
 		
 		pSalas.add(new JLabel("Salas Disponibles"));
-		this.listadoSalas = new JList<PaqueteSala>();
-		//this.listadoSalas.setModel(this.modeloSalas);
+		this.listadoSalas = new JList<String>();
+		this.listadoSalas.setModel(this.modeloSalas);
 		JScrollPane scrollSalas = new JScrollPane(this.listadoSalas);
 		scrollSalas.setPreferredSize(new Dimension(100,200));
 		pSalas.add(scrollSalas);

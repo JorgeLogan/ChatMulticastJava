@@ -123,7 +123,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				
 				
 				// Preparamos la escucha
-				this.escuchaMulticast = new EscuchaCliente(this.paqueteSalaActual, this.modeloMensajes);
+				this.escuchaMulticast = new EscuchaCliente(this.paqueteSalaActual, this.modeloMensajes, this.modeloSalas, this.salasDisponibles);
 			}else {
 				JOptionPane.showMessageDialog(this,respuesta.getMensaje());
 			}
@@ -189,9 +189,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		if(this.conectado == false) return;
 		
 		// Si llegamos aquí, es que estamos conectados, asi que cambiaremos eso...
-		// empiezo limpiando los areas
+		// empiezo limpiando los areas y el listado de salas
 		this.modeloMensajes.clear();
-		//this.modeloSalas.clear();
+		this.modeloSalas.clear();
+		this.salasDisponibles.clear();
 		
 		System.out.println("Enviando mensaje de desconexion al servidor");
 		try {
@@ -280,7 +281,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		try {
 			paqueteNuevo.setPuerto(Integer.parseInt(JOptionPane.showInputDialog("Escribe el puerto de escucha")));
 			if(paqueteNuevo.getPuerto() == 0) return;
-			paqueteNuevo.setPuerto(Integer.parseInt(JOptionPane.showInputDialog("Escribe el puerto de escucha")));
+			
 			paqueteNuevo.setTamMaxBuffer(Integer.parseInt(JOptionPane.showInputDialog("Escribe el tamaño máximo del paquete")));
 			if(paqueteNuevo.getTamMaxBuffer() == 0) return;
 
@@ -297,24 +298,25 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				this.modeloMensajes.addElement(paqueteNuevo.getNombre());
 				
 				// Creamos un paqueteChat para enviar a los clientes actuales
-				PaqueteChat pc = new PaqueteChat(this.salasDisponibles);
-				//this.enviarMensaje(pc);
+				PaqueteChat pc = new PaqueteChat(this.nick, paqueteNuevo);
+				this.enviarMensaje(pc);
+				System.out.println(" ---------------------> Enviada sala a los clientes");
 				
 				// Creamos un paqueteLogin para avisar al servidor para los clientes nuevos que llegen despues
 				PaqueteLogin pl = new PaqueteLogin(paqueteNuevo);
 				this.enviarMensaje(pl);
+				System.out.println(" ---------------------> Enviada sala al servidor");
 			}
 		}
 		catch(Exception e) {
-			//JOptionPane.showMessageDialog(this, "Valores no validos: " + e.getMessage());
-			System.out.println("Valores nulos no validos, asi que se sale de la función sin crear sala");
+			System.out.println("Valores nulos no validos, asi que se sale de la función sin crear sala: " + e.getMessage());
 			return;
 		}	
 	}
 
 	
 	public boolean existeSala(String nombreSala) {
-		return !this.salasDisponibles.contains(nombreSala);
+		return this.salasDisponibles.contains(nombreSala);
 	}
 	
 	
@@ -392,7 +394,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			paquete.setMensaje(cadenaFormateada);
 			byte[] paqueteBytes = FuncionesConversion.convertirPaquete(paquete);
 								
-			// Enviamos el datagrama con el paqute
+			// Enviamos el datagrama con el paquete
 			DatagramPacket datagrama = new DatagramPacket(paqueteBytes, paqueteBytes.length ,grupo, puerto);
 			socket.send(datagrama);
 						
@@ -406,7 +408,38 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		}
 	}
 	
-	
+	/**
+	 * Funcion para enviar un paqueteChat a los clientes por multicast
+	 * @param paquete
+	 */
+	public void enviarMensaje(PaqueteChat paquete) {
+		try {
+			// Preparo los elementos de emision del multicast
+			InetAddress grupo = InetAddress.getByName(this.paqueteSalaActual.getGrupo());
+			MulticastSocket socketMc = new MulticastSocket(this.paqueteSalaActual.getPuerto());
+			
+			// Uno el socketMc al grupo
+			socketMc.joinGroup(grupo);
+			
+			// Preparo el buffer de bytes
+			byte[] buffer = new byte[this.paqueteSalaActual.getTamMaxBuffer()];
+			buffer = FuncionesConversion.convertirPaquete(paquete);
+			
+			// Ya puedo preparar el datagrama
+			DatagramPacket datagrama = new DatagramPacket(buffer, buffer.length, 
+					grupo, this.paqueteSalaActual.getPuerto());
+			socketMc.send(datagrama);
+			
+			// Y ahora cierro los elementos
+			socketMc.leaveGroup(grupo);
+			socketMc.close();
+		} 
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 	
 	/***************************************************************************************************
@@ -436,11 +469,16 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		MulticastSocket socketMC;
 		InetSocketAddress grupoReceptor;
 		NetworkInterface netInterface;
-		DefaultListModel<String> listado;
+		DefaultListModel<String> listadoMensajes;
+		DefaultListModel<String> listadoSalas;
+		List<PaqueteSala> listadoPaqueteSalas;
 		
-		public EscuchaCliente(PaqueteSala p, DefaultListModel<String> listado) {
+		public EscuchaCliente(PaqueteSala p, DefaultListModel<String> listadoM, DefaultListModel<String>listadoS, 
+				List<PaqueteSala> listaPaquetes) {
 			this.paquete = p;
-			this.listado = listado;
+			this.listadoMensajes = listadoM;
+			this.listadoSalas = listadoS;
+			this.listadoPaqueteSalas = listaPaquetes;
 			
 			try {
 				grupoBase = InetAddress.getByName(p.getGrupo());
@@ -471,21 +509,48 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			// Esperamos por paquetes en el socket multicast
 			try {
 				socketMC.receive(datagrama);
-				String emisor = FuncionesConversion.extraerPaquete(buffer).getNombreUsuario();System.out.println("Mi nick: " + nick + " emisor: " + emisor);
+				String emisor = FuncionesConversion.extraerPaquete(buffer).getNombreUsuario();
+				System.out.println("Mi nick: " + nick + " emisor: " + emisor);
 				String mensaje = FuncionesConversion.extraerPaquete(buffer).getMensaje();
 				
 				// Pasamos el mensaje al listado, poniendole cabecera si no la tiene (busqueda de bugs, ejem)
+				// Aunque puede ser que el paquete recibido, solo quiera informar de una sala nueva!! En ese caso el formato es distinto
 				if(mensaje.contains("dice:") == false) { // Si no tiene el indicador de nick, agrego el nick
-					this.listado.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));	
+					this.listadoMensajes.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));	
 				}else {
-					this.listado.addElement(mensaje);
+					this.listadoMensajes.addElement(mensaje);
+					
+				}
+				
+				// Buscamos si en el paquete recibido, tenemos salas nuevas
+				// Si no tiene un texto normal, puede ser que sea una sala nueva
+				System.out.println("\nBuscamos salas en el paquete recibido --> ");
+				PaqueteChat pc = FuncionesConversion.extraerPaquete(buffer);
+				if(pc.getNuevaSala()!= null) {
+					System.out.println("\nBuscamos salas en el paquete recibido -->" + pc.getNuevaSala().toString());
+					
+					if(this.listadoSalas.contains(pc.getNuevaSala().getNombre() )== false) {
+						this.listadoSalas.addElement(pc.getNuevaSala().getNombre());
+						this.listadoPaqueteSalas.add(pc.getNuevaSala());
+						System.out.println("--->  --> Sala Nueva añadida: " + pc.getNuevaSala().getNombre());
+						JOptionPane.showMessageDialog(null, "Sala Nueva añadida: " + pc.getNuevaSala().getNombre());
+					}
+					else {
+						System.out.println("No agrego la sala porque ya la tengo en el listado");
+						for(int i=0; i<this.listadoMensajes.size(); i++) {
+							System.out.println("Listado " + i + " ----------------------------------------> " + listadoMensajes.get(i));
+						}
+					}
+				}
+				else {
+					System.out.println("\nBuscamos salas en el paquete recibido --> NO hay sala en el paquete");
 				}
 				
 				// COmprobamos que no tengamos un listado enorme para no gastar mucha memoria
-				if(this.listado.size() > 10) this.listado.remove(0);
+				if(this.listadoMensajes.size() > 10) this.listadoMensajes.remove(0);
 				
 				
-				System.out.println("Recibo por MultiCast -----> " + emisor + "--> " + mensaje);	
+				System.out.println("Recibo por MultiCast -----> " + emisor + "--> " + mensaje);
 			} 
 			catch (IOException e) {
 				System.out.println("Error o cierre en la escucha del cliente: " + e.getMessage());

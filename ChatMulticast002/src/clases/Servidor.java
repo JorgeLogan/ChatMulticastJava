@@ -22,6 +22,8 @@ public class Servidor extends VentanaServidor {
 	private Login login= null;	// Para el control del login de los clientes
 	private final String direccionGrupo = "225.2.3.4";
 	
+	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
+	
 	// Constructor de la clase
 	public Servidor() {
 		super();
@@ -47,18 +49,18 @@ public class Servidor extends VentanaServidor {
 		System.out.println("Pulsado conectar");
 		// Creamos la sala
 		this.agora = new Sala(this.nick ,InterfazConexion.HOST, this.direccionGrupo, "Sala Agora", 5678, 1000);
-	
+		
+		// Ahora nos preparamos para la escucha de clientes con el objeto de login, que se pondra a la escucha de clientes
+		this.salasDisponibles.add(this.agora.getPaqueteSala());
+		
 		// Escuchamos la sala Agora en el listado de mensajes a traves del modelo
-		this.escuchaAgora = new EscuchaSalaModeler(this.agora, this.modeloMensajes);
+		this.escuchaAgora = new EscuchaSalaModeler(this.agora, this.modeloMensajes, this.salasDisponibles);
 		
 		// Iniciamos el hilo de escucha
 		this.escuchaAgora.start();
 		
-		// Ahora nos preparamos para la escucha de clientes con el objeto de login, que se pondra a la escucha de clientes
-		// Preparo el listado de salas
-		List<PaqueteSala> salas = new LinkedList<PaqueteSala>();
-		salas.add(this.agora.getPaqueteSala());
-		this.login = new Login(salas, InterfazConexion.PUERTO_TCP, this.modeloUsuarios);
+		
+		this.login = new Login(this.salasDisponibles, InterfazConexion.PUERTO_TCP, this.modeloUsuarios);
 
 		// Ponemos los controles en modo conectado
 		this.gestionControles(true);
@@ -78,15 +80,19 @@ public class Servidor extends VentanaServidor {
 			agora.cerrarSala();
 		}
 		
-		if(escuchaAgora!= null) {
+		if(this.escuchaAgora!= null) {
 			System.out.println("Cerrando hilo de escucha de la sala Agora en el Servidor...");
-			escuchaAgora.cerrarHilo();
+			this.escuchaAgora.cerrarHilo();
 		}
 		
 		
-		if(login!= null) {
+		if(this.login!= null) {
 			System.out.println("Cerrando hilo login....");
-			login.cerrarHilo();
+			this.login.cerrarHilo();
+		}
+		
+		if(this.agora.isAlive()) {
+			this.agora.cerrarSala();
 		}
 		
 		// Ponemos los controles en modo desconectaco
