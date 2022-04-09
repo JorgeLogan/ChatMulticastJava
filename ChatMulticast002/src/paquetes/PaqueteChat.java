@@ -13,7 +13,9 @@ public class PaqueteChat implements Serializable {
 	private String nombreUsuario;
 	private String mensaje;
 	//private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
-	private PaqueteSala nuevaSala = null;
+	private PaqueteSala sala = null;
+	private boolean borrarSala = false; // Puede ser que la sala quiera borrarse
+	
 	
 	// Constructores
 	public PaqueteChat() {}
@@ -29,10 +31,11 @@ public class PaqueteChat implements Serializable {
 	}
 	*/
 	
-	public PaqueteChat(String usuario, PaqueteSala sala) {
+	public PaqueteChat(String usuario, PaqueteSala sala, boolean borrarSala) {
 		this.nombreUsuario = usuario;
-		this.nuevaSala = sala;
+		this.sala = sala;
 		this.mensaje = "SALA";
+		this.borrarSala = borrarSala;
 	}
 	
 	// Getters y Setters
@@ -53,11 +56,19 @@ public class PaqueteChat implements Serializable {
 	}
 
 	public PaqueteSala getNuevaSala() {
-		return nuevaSala;
+		return sala;
 	}
 
 	public void setNuevaSala(PaqueteSala nuevaSala) {
-		this.nuevaSala = nuevaSala;
+		this.sala = nuevaSala;
+	}
+	
+	public boolean getBorrarSala() {
+		return this.borrarSala;
+	}
+	
+	public void setBorrarSala(boolean b) {
+		this.borrarSala = b;
 	}
 	
 	

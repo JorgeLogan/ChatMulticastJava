@@ -21,7 +21,8 @@ public class PaqueteLogin implements Serializable{
 	// Atributos
 	private String nick; // El nick a comprobar
 	private boolean desconectar; // Por si el usuario quiere desconectarse, o es aceptado por el server
-	private PaqueteSala paqueteSalaNueva = null;
+	private PaqueteSala paqueteSala = null;
+	private boolean borrarPaquete = false;
 	
 	// Constructor vacio
 	public PaqueteLogin(){}
@@ -30,23 +31,25 @@ public class PaqueteLogin implements Serializable{
 	public PaqueteLogin(String nick, boolean desconectar) {
 		this.nick = nick;
 		this.desconectar = desconectar;
-		this.paqueteSalaNueva = null; // Ya estaba en la declaración, pero prefiero que quede claro visualmente
+		this.paqueteSala = null; // Ya estaba en la declaración, pero prefiero que quede claro visualmente
+		this.borrarPaquete = false; // Igual que arriba
 	}
 	
 	// Getters y Setters
 	public PaqueteSala getPaqueteSalaNueva() {
-		return paqueteSalaNueva;
+		return paqueteSala;
 	}
 
 	public void setPaqueteSalaNueva(PaqueteSala paqueteSalaNueva) {
-		this.paqueteSalaNueva = paqueteSalaNueva;
+		this.paqueteSala = paqueteSalaNueva;
 	}
 
 	// Constructor para las salas creadas por clientes conectados
-	public PaqueteLogin(PaqueteSala sala) {
+	public PaqueteLogin(PaqueteSala sala, boolean borrar) {
 		this.nick = "SALA";
 		this.desconectar = false;
-		this.paqueteSalaNueva = sala;
+		this.paqueteSala = sala;
+		this.borrarPaquete = borrar;
 	}
 	
 	public String getNick() {
@@ -63,6 +66,13 @@ public class PaqueteLogin implements Serializable{
 
 	public void setDesconectar(boolean desconectar) {
 		this.desconectar = desconectar;
+	}
+	
+	public boolean isBorrar() {
+		return this.borrarPaquete;
+	}
+	public void setBorrar(boolean borrar) {
+		this.borrarPaquete = borrar;
 	}
 	
 	/*

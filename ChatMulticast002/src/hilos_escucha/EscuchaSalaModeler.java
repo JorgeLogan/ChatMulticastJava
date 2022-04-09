@@ -36,13 +36,24 @@ public class EscuchaSalaModeler extends HiloEscucha{
 		// A no ser que el mensaje sea SALA. En ese caso, solo informamos de que se recibe la sala
 		System.out.println("---------------> recibo " + paquete.getMensaje());
 		String mensaje = "";
-		if(paquete.getMensaje().contains(" dice:") == false && paquete.getMensaje().contains("SALA") == false){
+		
+		if(paquete.getMensaje().contains(" dice:") == false){
 			mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), paquete.getMensaje());	
 		}else {
-			if(paquete.getMensaje().contains("SALA"))
-			mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), "SE HA CREADO UNA SALA NUEVA: " + paquete.getNuevaSala().toString());
-			System.out.println("SE HA CREADO UNA SALA NUEVA: " + paquete.getNuevaSala().toString());
-			this.salasDisponibles.add(paquete.getNuevaSala());
+			mensaje = paquete.getMensaje();
+		}
+		
+		if(paquete.getNuevaSala()!= null) {
+			if(paquete.getBorrarSala() == false) {
+				mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), "SE HA CREADO UNA SALA NUEVA: " + paquete.getNuevaSala().toString());
+				System.out.println("SE HA CREADO UNA SALA NUEVA: " + paquete.getNuevaSala().toString());
+				this.salasDisponibles.add(paquete.getNuevaSala());								
+			}
+			else {
+				this.salasDisponibles.remove(paquete.getNuevaSala());
+				System.out.println("------------------------------------------borramos sala " + paquete.getNuevaSala().getNombre());
+			}
+
 		}
 		
 		System.out.println("Intentamos poner en el JList --> " + mensaje);
@@ -56,5 +67,5 @@ public class EscuchaSalaModeler extends HiloEscucha{
 	public void cerrarHilo() {
 		this.salirHilo = true;
 		System.out.println("Hilo de escucha de sala cerrado");
-	}
+	} 
 }

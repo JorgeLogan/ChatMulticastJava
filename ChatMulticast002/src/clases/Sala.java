@@ -26,6 +26,7 @@ public class Sala extends Thread {
 	private String nombreSala;
 	private int puerto;
 	private int tamMaximoBuffer;
+	private MulticastSocket socket;
 	
 	// Atributos para el hilo
 	private boolean salirSala = false;
@@ -72,7 +73,7 @@ public class Sala extends Thread {
 			this.start();
 		
 		} 
-		catch (UnknownHostException e) {
+		catch (Exception e) {
 			System.out.println("No se pudo crear/conectar la sala: " + e.getMessage() );
 			this.salirSala = true;
 		}
@@ -117,7 +118,7 @@ public class Sala extends Thread {
 		
 		try {
 			// Creo el multicast para leer el objeto, con el puerto que queremos escuchar
-			MulticastSocket socket = new MulticastSocket(this.puerto);
+			socket = new MulticastSocket(this.puerto);
 			
 			// Configuramos la IP del grupo de conexion
 			InetSocketAddress grupoSocket = new InetSocketAddress(this.grupo, this.puerto);
@@ -157,6 +158,12 @@ public class Sala extends Thread {
 	// Para cerrar la sala
 	public void cerrarSala() {
 		this.salirSala = true;
+		// Para evitar quedar colgado como me paso a veces, cierro el socket para causar excepcion
+		try {
+			this.socket.close();
+			this.socket = null;	
+		}
+		catch(Exception e) {}
 	}
 	
 	/**
@@ -203,15 +210,15 @@ public class Sala extends Thread {
 				if(i >= this.publi.length -1) i = 0;
 				else i++;
 				
-				sleep(15000);
+				sleep(10 * 1000);
 			} 
 			catch (Exception e) {
-				System.out.println("Error en el bucle de publi de la sala " + 
+				System.out.println("Error en el bucle de publi de la sala " +
 						this.nombreSala + ": " + e.getMessage());
 				this.salirSala = true;
 			}
 		}
-		System.out.println("Cerrada la sala " + this.nombreSala);
+		System.out.println("\n<--- <--- Cerrada la sala " + this.nombreSala + "\n");
 	}
 
 	/**
@@ -227,5 +234,9 @@ public class Sala extends Thread {
 		paquete.setPuerto(puerto);
 		paquete.setTamMaxBuffer(tamMaximoBuffer);
 		return paquete;
+	}
+	
+	private String getNombreSala() {
+		return this.nombreSala;
 	}
 }

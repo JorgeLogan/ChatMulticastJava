@@ -40,6 +40,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 
 	// Atributos
 	private String nick;
+	private String miIP;
 	private Socket socket = null;
 	private ObjectOutputStream objSalida = null;
 	private ObjectInputStream objEntrada = null;
@@ -54,6 +55,10 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	// Y creo un diccionario de las salas disponibles
 	//private Map<String, PaqueteSala> salasDisponibles = new HashMap<String, PaqueteSala>();
 	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
+	
+	// Para controlar las salas que creo yo, me hago un listado con ellas
+	private List<Sala> misSalas = new LinkedList<Sala>();
+	
 	/*****************************************************************************************
 	 * Constructor de la clase
 	 * 
@@ -61,9 +66,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	 */
 	public Cliente() {
 		// Ponemos los botones en modo de conexion desconectado
-		this.gestionBotonesConexion();
-		
-		
+		this.gestionBotonesConexion();		
 	}
 	
 	/**
@@ -101,29 +104,36 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 			// Esperamos respuesta del servidor
 			PaqueteRespuesta respuesta = this.recibirMensajeTCP(socket);
 			
+			// Si no hemos recibido respuesta, salimos por la tangente
 			if(respuesta == null ) {
 				System.out.println("Respuesta nula. ERROR");
 				return;
 			}
 			
+			// En caso contrario, mostramos la respuesta y gestionamos segun la misma
 			System.out.println("Hemos recibido respuesta: " + respuesta.toString());
+			
 			if(respuesta.isAceptado()) {
+				// Si fuimos aceptados, nos llamaremos como el nick propuesto
 				this.nick = this.txtNick.getText().toString().trim();
-				this.conectado = true;
-				
+								
 				// Cogemos los paquetes de la sala, e iniciamos escucha
 				this.leerSalas(respuesta.getPaquetesSala());
+				
+				// Nos colocamos el listado en la posicion 0, de la sala Agora
+				this.listadoSalas.setSelectedIndex(0);
+				
+				// Nos unimos a la sala
+				this.unirseSala(this.listadoSalas.getSelectedValue());
+				
+				// Cambiamos de estado a conectado
+				this.conectado = true;
 				
 				// Configuramos los controles a modo conextado
 				this.gestionBotonesConexion();
 				
-				// Nos unimos a la sala
-				this.unirseSala(nickEnvio);
-				
-				
-				
 				// Preparamos la escucha
-				this.escuchaMulticast = new EscuchaCliente(this.paqueteSalaActual, this.modeloMensajes, this.modeloSalas, this.salasDisponibles);
+				
 			}else {
 				JOptionPane.showMessageDialog(this,respuesta.getMensaje());
 			}
@@ -169,7 +179,11 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		boolean resultado = false;
 		
 		try {
-			this.socket = new Socket(HOST, PUERTO_TCP);
+			// Primero capturo mi IP
+			this.miIP = InetAddress.getLocalHost().getHostAddress();
+			
+			// Ya me encargo del socket
+			this.socket = new Socket(this.miIP, PUERTO_TCP);
 			resultado = true;
 		} 
 		catch (UnknownHostException e) {
@@ -196,7 +210,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		
 		System.out.println("Enviando mensaje de desconexion al servidor");
 		try {
-			this.socket = new Socket(this.HOST, this.PUERTO_TCP);
+			this.socket = new Socket(this.miIP, this.PUERTO_TCP);
 			
 		}catch (Exception e) {
 			System.out.println("No se pudo crear una nueva conexion al servidor");
@@ -227,9 +241,18 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		this.gestionBotonesConexion();
 	}
 
-	
+	/**
+	 * Creo una funcion que cierra las salas que crea el cliente al desconectarse
+	 */
 	private void cerrarSalasPropias() {
-		System.out.println("SIN IMPLEMENTAR CERRAR SALAS");
+		System.out.println("Cerrando mis salas");
+		
+		for(int i=0; i<this.misSalas.size(); i++) {
+			try {
+				this.misSalas.get(i).cerrarSala();				
+			}catch(Exception e) {} // Por si da error alguna, que no afecte a todo
+
+		}
 	}
 	
 	/***********************************************************************************************************
@@ -266,24 +289,20 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 	@Override
 	public void crearSala() {
 		System.out.println("----------------------------------------------------------------------------------------");
+		// Creo el paquete nuevo igualandolo a la sala actual, ya cambiamos los elementos que necesitemos cambiar
 		PaqueteSala paqueteNuevo = new PaqueteSala();
 		paqueteNuevo.setCreador(nick);
+		paqueteNuevo.setIpRemota(miIP);
+		paqueteNuevo.setGrupo(this.paqueteSalaActual.getGrupo());
+		paqueteNuevo.setTamMaxBuffer(this.paqueteSalaActual.getTamMaxBuffer());
 		
+		// Aqui vamos a cambiar los elementos que queremos, el nombre, y el puerto de escucha
 		paqueteNuevo.setNombre(JOptionPane.showInputDialog("Escribe el nombre de la nueva sala"));
 		if(paqueteNuevo.getNombre() == null) return;
-		
-		paqueteNuevo.setGrupo(JOptionPane.showInputDialog("Escribe la direccion tipo D donde estará el grupo"));
-		if(paqueteNuevo.getGrupo() == null) return;
-		
-		paqueteNuevo.setIpRemota(JOptionPane.showInputDialog("Escribe la direccion IP del equipo servidor"));
-		if(paqueteNuevo.getIpRemota() == null) return;
-		
+
 		try {
 			paqueteNuevo.setPuerto(Integer.parseInt(JOptionPane.showInputDialog("Escribe el puerto de escucha")));
 			if(paqueteNuevo.getPuerto() == 0) return;
-			
-			paqueteNuevo.setTamMaxBuffer(Integer.parseInt(JOptionPane.showInputDialog("Escribe el tamaño máximo del paquete")));
-			if(paqueteNuevo.getTamMaxBuffer() == 0) return;
 
 			// Si llegamos aqui, todos los valores son "validos" (no hago comprobaciones, se toma todo por válido)
 			// lo unico que voy a comprobar es que no exista esa sala en el listado
@@ -291,21 +310,26 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				JOptionPane.showMessageDialog(this, "Lo siento, ya existe una sala con ese nombre. Salimos");
 			}
 			else {
+				
 				// Agregamos el paquete a nuestro listado de salas
 				this.salasDisponibles.add(paqueteNuevo);
 				
 				// La pasamos a nuestro listado visual de salas
-				this.modeloMensajes.addElement(paqueteNuevo.getNombre());
+				this.modeloSalas.addElement(paqueteNuevo.getNombre());
 				
 				// Creamos un paqueteChat para enviar a los clientes actuales
-				PaqueteChat pc = new PaqueteChat(this.nick, paqueteNuevo);
+				PaqueteChat pc = new PaqueteChat(this.nick, paqueteNuevo, false);
 				this.enviarMensaje(pc);
 				System.out.println(" ---------------------> Enviada sala a los clientes");
 				
 				// Creamos un paqueteLogin para avisar al servidor para los clientes nuevos que llegen despues
-				PaqueteLogin pl = new PaqueteLogin(paqueteNuevo);
+				PaqueteLogin pl = new PaqueteLogin(paqueteNuevo, false); // El parametro es por si se quiere borrar sala
 				this.enviarMensaje(pl);
 				System.out.println(" ---------------------> Enviada sala al servidor");
+				
+				// Ahora solo queda crearla!!
+				Sala sala = new Sala(paqueteNuevo);
+				this.misSalas.add(sala);
 			}
 		}
 		catch(Exception e) {
@@ -314,21 +338,122 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 		}	
 	}
 
-	
+	/**
+	 * Funcion para comprobar si existe una sala
+	 * @param nombreSala El nombre a comprobar
+	 * @return true si existe, false si no
+	 */
 	public boolean existeSala(String nombreSala) {
 		return this.salasDisponibles.contains(nombreSala);
 	}
 	
-	
-	
+	/**
+	 * Funcion para unirse a una sala seleccionada del listado de salas
+	 */
 	@Override
 	public void unirseSala(String valor) {
-		System.out.println("SIN IMPLEMENTAR");		
+		System.out.println("Queremos unirnos a la sala " + valor);
+		
+		// Antes de unirnos a ninguna, debemos asegurarnos de que no estamos en ninguna, para salir de ella
+		if(this.conectado == true) this.abandonarSalaActual();
+		
+		// Avisamos de lo que hacemos
+		JOptionPane.showMessageDialog(this, "Bienvenido a la sala " + valor); 
+		
+		// Buscamos en el listado, el paquete de sala segun el nombre elegido.
+		// podria buscar por indice, pero no me fio del todo del UDP, asi que lo hago por nombre
+		this.paqueteSalaActual = this.getPaqueteNombre(valor);
+		
+		// Ya sabemos que sala conectarnos, asi que nos conectamos
+		this.escuchaMulticast = new EscuchaCliente(this.paqueteSalaActual, 
+				this.modeloMensajes, this.modeloSalas, this.salasDisponibles);
 	}
 
+	/**
+	 * Creo una funcion para abandonar la sala actual antes de cambiar de sala
+	 */
+	private void abandonarSalaActual() {
+		// Antes de salir, es de buena educacion informar de que dejas la sala
+		this.enviarMensaje("Hasta la proxima, gente!!");
+		
+		if(this.escuchaMulticast!= null) {
+			this.escuchaMulticast.cerrarHilo();
+		}
+		
+		// Ahora dejamos el multicast actual
+		this.escuchaMulticast.cerrarHilo();
+		
+		// Limpiamos el listado
+		this.modeloMensajes.clear();
+	}
+	
+	/**
+	 * Creo una funcion que me devuelva un paquete del listado de salas disponibles
+	 * basado en un nombre de sala. El nombre será seleccionado en el JList, y aunque
+	 * sería mas facil buscarlo por indice, no me fio del todo del sistema UDP, y voy
+	 * a lo seguro buscando por nomrbe
+	 * @param nombre El nombre seleccionado en el Jlist
+	 * @return El paquete con ese nombre
+	 */
+	private PaqueteSala getPaqueteNombre(String nombre) {
+		PaqueteSala paquete = null; // El paquete que devolvera la funcion
+		boolean encontrado = false; // Booleano para controlar la funcion en el ciclo
+		
+		// Recorro las salas hasta que las agote o de con la correcta
+		for(int i=0; i<this.salasDisponibles.size() && encontrado == false; i++) {
+			
+			// Si la sala tiene el nombre que buscamos, ya tenemos la correcta
+			if(this.salasDisponibles.get(i).getNombre().equals(nombre) == true) {
+				paquete = this.salasDisponibles.get(i);
+				encontrado = true;
+			}
+		}
+		return paquete;
+	}
+	
+	/**
+	 * Funcion para borrar una sala seleccionada en el listado.
+	 * Solo realizará la tarea si la sala esta creada por el propio usuario
+	 */
 	@Override
 	public void borrarSala(String valor) {
-		System.out.println("SIN IMPLEMENTAR");		
+		// Cogemos el nombre de la sala
+		//String nombreBorrar = this.listadoMensajes.getName();
+		boolean encontrada = false; // Para salir del bucle rapido
+		
+		System.out.println("Queremos borrar la sala " + valor);
+		for(int i=0; i<this.misSalas.size() && encontrada == false; i++) {
+			
+			if(this.misSalas.get(i).getPaqueteSala().getNombre().equals(valor)) {
+				
+				this.misSalas.get(i).cerrarSala();
+				this.salasDisponibles.remove(valor);
+				
+				// Preparamos un paquete chat para los usuarios conectador
+				PaqueteChat paquete = new PaqueteChat();
+				paquete.setNombreUsuario(this.nick);
+				paquete.setMensaje("SALA");
+				paquete.setNuevaSala(this.misSalas.get(i).getPaqueteSala());
+				paquete.setBorrarSala(true);
+				this.enviarMensaje(paquete); // Avisamos a los usuarios conectados
+				
+				// Preparamos el paquete tipo login para avisar al servidor
+				PaqueteLogin pLogin = new PaqueteLogin();
+				pLogin.setNick(nick);
+				pLogin.setDesconectar(false);
+				pLogin.setPaqueteSalaNueva(this.misSalas.get(i).getPaqueteSala());
+				pLogin.setBorrar(true);
+				this.enviarMensaje(pLogin); // Avisamos al servidor
+				
+				// Mostramos mensaje de aviso
+				JOptionPane.showMessageDialog(this, "Sala borrada");
+				encontrada = true; // Salimos del bucle
+			}
+			
+			// Si no la encontramos, no es nuestra
+			if(encontrada == false) JOptionPane.showMessageDialog(this, "No puedes borrar una sala que no es tuya");
+			
+		}
 	}
 
 	/*************************************************************************************************
@@ -529,18 +654,27 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				if(pc.getNuevaSala()!= null) {
 					System.out.println("\nBuscamos salas en el paquete recibido -->" + pc.getNuevaSala().toString());
 					
-					if(this.listadoSalas.contains(pc.getNuevaSala().getNombre() )== false) {
-						this.listadoSalas.addElement(pc.getNuevaSala().getNombre());
-						this.listadoPaqueteSalas.add(pc.getNuevaSala());
-						System.out.println("--->  --> Sala Nueva añadida: " + pc.getNuevaSala().getNombre());
-						JOptionPane.showMessageDialog(null, "Sala Nueva añadida: " + pc.getNuevaSala().getNombre());
-					}
-					else {
-						System.out.println("No agrego la sala porque ya la tengo en el listado");
-						for(int i=0; i<this.listadoMensajes.size(); i++) {
-							System.out.println("Listado " + i + " ----------------------------------------> " + listadoMensajes.get(i));
+					// Comprobamos si es para borrar o no
+					if(pc.getBorrarSala() == false) {
+						if(this.listadoSalas.contains(pc.getNuevaSala().getNombre() )== false) {
+							this.listadoSalas.addElement(pc.getNuevaSala().getNombre());
+							this.listadoPaqueteSalas.add(pc.getNuevaSala());
+							System.out.println("--->  --> Sala Nueva añadida: " + pc.getNuevaSala().getNombre());
+							JOptionPane.showMessageDialog(null, "Sala Nueva añadida: " + pc.getNuevaSala().getNombre());
 						}
+						else {
+							System.out.println("No agrego la sala porque ya la tengo en el listado");
+							for(int i=0; i<this.listadoSalas.size(); i++) {
+								System.out.println("Listado " + i + " ----------------------------------------> " + listadoSalas.get(i));
+							}
+						}						
 					}
+					else { // Tenemos que borrar la sala
+						this.listadoPaqueteSalas.remove(pc.getNuevaSala());
+						this.listadoSalas.removeElement(pc.getNuevaSala().getNombre());
+					}
+					
+
 				}
 				else {
 					System.out.println("\nBuscamos salas en el paquete recibido --> NO hay sala en el paquete");

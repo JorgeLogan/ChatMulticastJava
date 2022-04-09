@@ -182,7 +182,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 				System.out.println("Enviar mensaje pulsado");
 				if(this.txtMensaje.getText().length() > 0) {
 					String cadena = this.txtMensaje.getText().trim();
-					this.enviarMensaje(cadena);					
+					this.enviarMensaje(cadena);				
 				}
 
 				break;
@@ -192,12 +192,12 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 				break;
 			case "Unirse" :
 				System.out.println("Unirse pulsado");
-				//this.unirseSala(this.listadoSalas.getSelectedValue());
+				this.unirseSala(this.listadoSalas.getSelectedValue());
 				break;
 		
 			case "Borrar" :
 				System.out.println("Borrar pulsado");
-				//this.borrarSala(this.listadoSalas.getSelectedValue());
+				this.borrarSala(this.listadoSalas.getSelectedValue());
 				break;
 			case "Desconectar" :
 				System.out.println("Desconectar pulsado");

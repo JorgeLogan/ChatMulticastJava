@@ -21,7 +21,7 @@ public class Servidor extends VentanaServidor {
 	private EscuchaSalaModeler escuchaAgora = null;	// Para la escucha de mensajes de la sala Agora
 	private Login login= null;	// Para el control del login de los clientes
 	private final String direccionGrupo = "225.2.3.4";
-	
+
 	private List<PaqueteSala> salasDisponibles = new LinkedList<PaqueteSala>();
 	
 	// Constructor de la clase
@@ -70,9 +70,10 @@ public class Servidor extends VentanaServidor {
 	public void clickDesconectar() {
 		System.out.println("Pulsado desconectar");
 		
-		// Limpiamos los mensajes y los usuarios (se acabó lo que se daba)
+		// Limpiamos los mensajes, los usuarios y las salas que tengamos (se acabó lo que se daba)
 		this.modeloMensajes.clear();
 		this.modeloUsuarios.clear();
+		this.salasDisponibles.clear();
 			
 		// Cerramos la sala agora nada mas podamos
 		if(agora!= null) {
@@ -91,7 +92,7 @@ public class Servidor extends VentanaServidor {
 			this.login.cerrarHilo();
 		}
 		
-		if(this.agora.isAlive()) {
+		if(this.agora!= null && this.agora.isAlive()) {
 			this.agora.cerrarSala();
 		}
 		
@@ -125,5 +126,9 @@ public class Servidor extends VentanaServidor {
 	public void windowClosing(WindowEvent e) {
 		System.out.println("Cerrando ventana servidor");
 		this.clickDesconectar();
+		
+		// Para intentar cerrar hilos colgados
+		this.escuchaAgora = null;
+		this.login = null;
 	}
 }

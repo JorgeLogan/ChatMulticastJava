@@ -39,6 +39,6 @@ public abstract class HiloEscucha extends Thread{
 				System.out.println("-------> Error en el hilo de escucha Multicast--> " + e.getMessage());
 			}
 		}
-		System.out.println("Cerrado hilo de escucha del usuario: " + this.usuario);
+		System.out.println("<-- <-- Cerrado hilo de escucha del usuario: " + this.usuario);
 	}
 }
