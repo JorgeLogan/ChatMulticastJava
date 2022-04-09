@@ -42,6 +42,7 @@ public class EscuchaSalaModeler extends HiloEscucha{
 			if(paquete.getMensaje().contains("SALA"))
 			mensaje = FuncionesConversion.cadenaHTML(paquete.getNombreUsuario(), "SE HA CREADO UNA SALA NUEVA: " + paquete.getNuevaSala().toString());
 			System.out.println("SE HA CREADO UNA SALA NUEVA: " + paquete.getNuevaSala().toString());
+			this.salasDisponibles.add(paquete.getNuevaSala());
 		}
 		
 		System.out.println("Intentamos poner en el JList --> " + mensaje);
