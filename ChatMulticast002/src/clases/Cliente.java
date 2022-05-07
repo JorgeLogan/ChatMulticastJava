@@ -641,11 +641,15 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				// Pasamos el mensaje al listado, poniendole cabecera si no la tiene (busqueda de bugs, ejem)
 				// Aunque puede ser que el paquete recibido, solo quiera informar de una sala nueva!! En ese caso el formato es distinto
 				if(mensaje.contains("dice:") == false) { // Si no tiene el indicador de nick, agrego el nick
-					this.listadoMensajes.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));	
+					this.listadoMensajes.addElement(FuncionesConversion.cadenaHTML(emisor, mensaje));
+					
 				}else {
 					this.listadoMensajes.addElement(mensaje);
 					
 				}
+				
+				// Nos aseguramos de que el mensaje es visible en el listado
+				Cliente.this.listadoMensajes.ensureIndexIsVisible(this.listadoMensajes.capacity());
 				
 				// Buscamos si en el paquete recibido, tenemos salas nuevas
 				// Si no tiene un texto normal, puede ser que sea una sala nueva
