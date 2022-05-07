@@ -3,6 +3,13 @@ package hilos_escucha;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+/**
+ * Clase HiloEscucha
+ * Creo esta clase abstracta de hilo para poder adaptarla segun las necesidades de cliente/servidor
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public abstract class HiloEscucha extends Thread{
 	
 	// Atributos

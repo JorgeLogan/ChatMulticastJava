@@ -8,6 +8,14 @@ import java.io.ObjectOutputStream;
 
 import paquetes.PaqueteChat;
 
+/**
+ * Clase FuncionesConversion.
+ * Convierte los paquetes en bytes[] o viceversa, y tambien traduce un texto normal
+ * en formato html. Son funciones estaticas para evitar crear mas objetos
+ * 
+ * @author Jorge  Alvarez Ceñal
+ *
+ */
 public class FuncionesConversion {
 
 	public static byte[] convertirPaquete(PaqueteChat paquete) {

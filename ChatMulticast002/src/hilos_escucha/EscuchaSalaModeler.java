@@ -4,24 +4,41 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
+import javax.swing.JList;
 
+import clases.Cliente;
 import clases.FuncionesConversion;
 import clases.Sala;
 import paquetes.PaqueteChat;
 import paquetes.PaqueteSala;
 
+/**
+ * Clase EscuchaSalaModeler
+ * Esta clase sirve para escuchar los mensajes que se suceden en una sala en particular
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public class EscuchaSalaModeler extends HiloEscucha{
 	// Sala a escuchar
-	private Sala sala = null;
-	private DefaultListModel<String> modeloMensajes;
-	private List<PaqueteSala> salasDisponibles;
+	private Sala sala = null; // La sala a escuchar
+	private JList<String> jListado; // El JList usado. Necesario para posicionarlo al final de la lista
+	private DefaultListModel<String> modeloMensajes; // El modelo necesario para colocar los mensajes recibidos
+	private List<PaqueteSala> salasDisponibles; // Lleva el control de las salas disponibles en la sesion
 	
-	public EscuchaSalaModeler(Sala sala, DefaultListModel<String> modeloM, List<PaqueteSala> listaPaquetes) {
+	// Constructor con los elementos
+	public EscuchaSalaModeler(Sala sala, JList<String> jListado, DefaultListModel<String> modeloM, 
+			List<PaqueteSala> listaPaquetes) {
+		
 		this.sala = sala;
+		this.jListado = jListado;
 		this.modeloMensajes = modeloM;
 		this.salasDisponibles = listaPaquetes;
 	}
 	
+	/**
+	 * Metodo para la escucha. Lo hago sincronizado para evitar problemas
+	 */
 	@Override
 	public synchronized void escucha() {
 		// Nos ponemos a la escucha en la sala...
@@ -59,10 +76,17 @@ public class EscuchaSalaModeler extends HiloEscucha{
 		System.out.println("Intentamos poner en el JList --> " + mensaje);
 		this.modeloMensajes.addElement(mensaje);
 		
+		// Nos aseguramos de que el mensaje es visible en el listado
+		jListado.ensureIndexIsVisible(this.modeloMensajes.size()-1);
+		
 		// Para no tener un modeler demasiado largo, si pasa cierto numero de mensajes, borramos el primero
-		if(this.modeloMensajes.size() > 10) this.modeloMensajes.remove(0);
+		if(this.modeloMensajes.size() > 15) this.modeloMensajes.remove(0);
 	}
 	
+	
+	/**
+	 * Metodo para poder cerrar el hilo, y no dejar el proceso abierto
+	 */
 	@Override
 	public void cerrarHilo() {
 		this.salirHilo = true;

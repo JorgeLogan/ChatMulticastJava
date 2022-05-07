@@ -14,7 +14,8 @@ import paquetes.PaqueteSala;
 /**
  * La sala con los metodos que necesita para ser mas independiente.
  * Tambien se encarga de pasar la propia sala al listado de salas disponibles
- * @author Jorge
+ * 
+ * @author Jorge Alvarez Ceñal
  *
  */
 public class Sala extends Thread {

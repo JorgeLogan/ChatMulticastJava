@@ -27,7 +27,13 @@ import javax.swing.JTextField;
 import interfaces.InterfazEntornoGrafico;
 import paquetes.PaqueteSala;
 
-
+/**
+ * Clase VentanaCliente
+ * GUI del cliente
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public abstract class VentanaCliente extends JFrame implements InterfazEntornoGrafico<String>,  ActionListener, WindowListener{
 	/**
 	 * Agregado por el IDE
@@ -44,8 +50,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	protected JButton btnUnirseSala;
 	protected JButton btnBorrarSala;
 	
-	protected JList <String> listadoMensajes;
-	//protected JList <String> listadoSalas;
+	protected JList <String> jListadoMensajes;
 	protected JList <String> listadoSalas;
 	
 	protected DefaultListModel<String> modeloMensajes = new DefaultListModel<String>();
@@ -85,9 +90,9 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 		pChat.add(pNick);
 		
 		// Creo el listado y su scroll
-		this.listadoMensajes = new JList<String>();
-		this.listadoMensajes.setModel(this.modeloMensajes);
-		JScrollPane scroll = new JScrollPane(this.listadoMensajes);
+		this.jListadoMensajes = new JList<String>();
+		this.jListadoMensajes.setModel(this.modeloMensajes);
+		JScrollPane scroll = new JScrollPane(this.jListadoMensajes);
 		scroll.setMinimumSize(new Dimension(300,200));
 		scroll.revalidate();
 		pChat.add(scroll);
@@ -235,7 +240,7 @@ public abstract class VentanaCliente extends JFrame implements InterfazEntornoGr
 	 */
 	@Override
 	public void limpiarAreaTexto() {
-		this.listadoMensajes.removeAll();	
+		this.jListadoMensajes.removeAll();	
 	}
 	
 	/******************************************************************************************

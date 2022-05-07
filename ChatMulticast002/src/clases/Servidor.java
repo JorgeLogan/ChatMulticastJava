@@ -9,6 +9,22 @@ import interfaces.InterfazConexion;
 import paquetes.PaqueteSala;
 import vistas.VentanaServidor;
 
+/**
+ * Clase Servidor
+ * Es la primera que debe conectarse. Una vez conectada, tendra varias misiones:
+ *  	Estara a la escucha de clientes nuevos con el objeto Login.
+ * 			Cuando lleguen clientes, comprobara si tienen un login valido. SI es asi, se les enviara
+ * 			un paquete con los datos de la sala Agora (creada por el servidor, y del resto de salas 
+ * 			que pudiera haber, ya creadas por los clientes).
+ * 
+ * 		Los clientes conectados, tambien pueden enviarle datos con salas creadas o borradas, lo que servira
+ * 			al servidor para pasar las nuevas salas a los nuevos clientes
+ * 		
+ * 		Tambien escuchara los mensajes de los clientes de la sala Agora a traves de la escuchaSalaModeler
+ * 		
+ * @author Jorge
+ *
+ */
 public class Servidor extends VentanaServidor {
 	/**
 	 * Solicitado por el IDE
@@ -54,7 +70,8 @@ public class Servidor extends VentanaServidor {
 		this.salasDisponibles.add(this.agora.getPaqueteSala());
 		
 		// Escuchamos la sala Agora en el listado de mensajes a traves del modelo
-		this.escuchaAgora = new EscuchaSalaModeler(this.agora, this.modeloMensajes, this.salasDisponibles);
+		this.escuchaAgora = new EscuchaSalaModeler(this.agora, this.listadoMensajes, this.modeloMensajes, 
+				this.salasDisponibles);
 		
 		// Iniciamos el hilo de escucha
 		this.escuchaAgora.start();

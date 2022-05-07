@@ -15,7 +15,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
-public abstract  class VentanaServidor extends JFrame implements  ActionListener, WindowListener{
+/**
+ * Clase VentanaServidor
+ * GUI del servidor. 
+ * @author Jorge
+ *
+ */
+public abstract class VentanaServidor extends JFrame implements  ActionListener, WindowListener{
 	
 	/**
 	 * Version pedida por el IDE

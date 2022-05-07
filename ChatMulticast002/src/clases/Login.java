@@ -21,7 +21,8 @@ import paquetes.PaqueteSala;
  * Clase para el servidor que se ponga a la escucha de nuevos clientes. Tambien la reutilizo para 
  * el envio de salas nuevas por parte del cliente. 
  * Asi el servidor conoce las salas nuevas para clientes nuevos
- * @author Jorge
+ * 
+ * @author Jorge Alvarez Ceñal
  *
  */
 public class Login extends HiloEscucha implements Serializable{

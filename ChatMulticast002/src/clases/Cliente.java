@@ -31,6 +31,16 @@ import paquetes.PaqueteRespuesta;
 import paquetes.PaqueteSala;
 import vistas.VentanaCliente;
 
+/**
+ * Clase cliente.
+ * Intentara conectarse al servidor con un nick. Si es valido, este le enviara un paquete con los datos
+ * 	de la sala Agora.
+ * Una vez conectado, podra enviar mensajes a la sala, crear nuevas salas, unirse a las existentes, y 
+ * borrar las propias
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteLogin, PaqueteRespuesta>, Serializable{
 	
 	/**
@@ -649,7 +659,7 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				}
 				
 				// Nos aseguramos de que el mensaje es visible en el listado
-				Cliente.this.listadoMensajes.ensureIndexIsVisible(this.listadoMensajes.capacity());
+				Cliente.this.jListadoMensajes.ensureIndexIsVisible(this.listadoMensajes.size()-1);
 				
 				// Buscamos si en el paquete recibido, tenemos salas nuevas
 				// Si no tiene un texto normal, puede ser que sea una sala nueva
@@ -677,8 +687,6 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 						this.listadoPaqueteSalas.remove(pc.getNuevaSala());
 						this.listadoSalas.removeElement(pc.getNuevaSala().getNombre());
 					}
-					
-
 				}
 				else {
 					System.out.println("\nBuscamos salas en el paquete recibido --> NO hay sala en el paquete");
@@ -686,7 +694,6 @@ public class Cliente extends VentanaCliente implements InterfazConexion<PaqueteL
 				
 				// COmprobamos que no tengamos un listado enorme para no gastar mucha memoria
 				if(this.listadoMensajes.size() > 10) this.listadoMensajes.remove(0);
-				
 				
 				System.out.println("Recibo por MultiCast -----> " + emisor + "--> " + mensaje);
 			} 

@@ -1,6 +1,12 @@
 package clases;
 import paquetes.PaqueteChat;
 
+/**
+ * Clase creada para hacer pruebas
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public class Pruebas extends Thread{
 	
 	Sala sala = null;
