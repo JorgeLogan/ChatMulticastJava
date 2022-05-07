@@ -71,13 +71,21 @@ public class Sala extends Thread {
 			this.tamMaximoBuffer = paquete.getTamMaxBuffer();	
 									
 			// Abrimos el hilo
-			this.start();
-		
+			this.start();		
 		} 
 		catch (Exception e) {
 			System.out.println("No se pudo crear/conectar la sala: " + e.getMessage() );
 			this.salirSala = true;
 		}
+	}
+	
+	
+	// Creamos un paquete de bienvenida a la sala
+	private PaqueteChat paqueteBienvenida() {
+		PaqueteChat p = new PaqueteChat(); 
+		p.setNombreUsuario(nombreSala);
+		p.setMensaje("Se ha creado la sala de chat mas molona! Ouh yeah!");
+		return p;
 	}
 	
 	/**
@@ -190,6 +198,16 @@ public class Sala extends Thread {
 	 */
 	@Override 
 	public void run() {
+		// Enviamos paquete bienvenida al hilo
+		try {
+			sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		this.enviarMensaje(this.paqueteBienvenida());
+		
 		// Preparamos la publi
 		this.crearPubli();
 		

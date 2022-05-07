@@ -76,7 +76,6 @@ public class Servidor extends VentanaServidor {
 		// Iniciamos el hilo de escucha
 		this.escuchaAgora.start();
 		
-		
 		this.login = new Login(this.salasDisponibles, InterfazConexion.PUERTO_TCP, this.modeloUsuarios);
 
 		// Ponemos los controles en modo conectado

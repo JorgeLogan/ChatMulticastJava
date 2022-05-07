@@ -88,7 +88,7 @@ public abstract class VentanaServidor extends JFrame implements  ActionListener,
 		this.modeloMensajes = new DefaultListModel<String>();
 		this.listadoMensajes.setModel(modeloMensajes);
 		this.scrollMensajes = new JScrollPane(this.listadoMensajes);
-		this.scrollMensajes.setPreferredSize(new Dimension(500,300));
+		this.scrollMensajes.setPreferredSize(new Dimension(300,230));
 		pMensajesVert.add(this.scrollMensajes);
 		
 		// Creo un panel para los usuarios
@@ -104,7 +104,7 @@ public abstract class VentanaServidor extends JFrame implements  ActionListener,
 		this.modeloUsuarios = new DefaultListModel<String>();
 		this.listadoUsuarios.setModel(modeloUsuarios);
 		this.scrollUsuarios = new JScrollPane(this.listadoUsuarios);
-		this.scrollUsuarios.setPreferredSize(new Dimension(200,270));
+		this.scrollUsuarios.setPreferredSize(new Dimension(100,200));
 		pUsuariosVert.add(this.scrollUsuarios);
 			
 		this.btnSalir = new JButton("Salir de la aplicación");
